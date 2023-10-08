@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../utils/map.h"
-#define FIXTURESIZE 6
+#define FIXTURESIZE 10
 
 typedef struct ___content_t {
     char* title;
@@ -15,12 +15,21 @@ content_t fixture[] = {
     {"COMSCIP1102", "Object Oriented Programming"},
     {"COMPSCI2005", "Systems Programming"},
     {"COMPSCI2103", "Algorithm Design & Data Structures"},
-    {"COMPSCI2203", "Problem Solving & Software Development"}};
+    {"COMPSCI2203", "Problem Solving & Software Development"},
+    {"COMPSCI2205UAC", "Software Engineering Workshop I"},
+    {"COMPSCI2206", "Software Engineering Workshop II"},
+    {"COMPSCI2207", "Web & Database Computing"},
+    {"COMPSCI3007", "Artificial Intelligence"}};
 
 typedef struct ___thread_insert_list_arg_t {
     linked_list_t* L;
     content_t* content;
 } thread_insert_list_arg_t;
+
+typedef struct ___thread_insert_map_arg_t {
+    map_t* M;
+    content_t* content;
+} thread_insert_map_arg_t;
 
 linked_list_t* BeforeEachList() {
     linked_list_t* LL = (linked_list_t*)malloc(sizeof(linked_list_t));
@@ -28,6 +37,7 @@ linked_list_t* BeforeEachList() {
     return LL;
 }
 
+// Test cases for LinkedList
 void AfterEachList(linked_list_t* LL) {
     List_Free(LL);
     free(LL);
@@ -87,7 +97,8 @@ int test_contain_non_empty_list_does_not_exist_return_false() {
     if (List_Contains(L, "COMPSCI2203"))
         success = 1;
     if (success == 1)
-        printf("Failed: test_contain_non_empty_list_does_not_exist_return_false");
+        printf(
+            "Failed: test_contain_non_empty_list_does_not_exist_return_false");
     AfterEachList(L);
     return success;
 }
@@ -99,7 +110,7 @@ void* thread_insert_list(void* arg) {
     return NULL;
 }
 
-int test_multi_threaded_insert() {
+int test_multithreaded_insert_list() {
     linked_list_t* L = BeforeEachList();
     pthread_t thr[FIXTURESIZE];
     thread_insert_list_arg_t args[FIXTURESIZE];
@@ -124,8 +135,78 @@ int test_multi_threaded_insert() {
         }
     }
     if (success == 1)
-        printf("Failed: test_multithreaded_insert\n");
+        printf("Failed: test_multithreaded_insert_list\n");
     AfterEachList(L);
+    return success;
+}
+
+// Test cases for map
+map_t* BeforeEachMap() {
+    map_t* M = (map_t*)malloc(sizeof(map_t));
+    Map_Init(M);
+    return M;
+}
+
+void AfterEachMap(map_t* M) {
+    Map_Free(M);
+    free(M);
+}
+
+void* thread_insert_map(void* arg) {
+    thread_insert_map_arg_t* fixture_ptr = (thread_insert_map_arg_t*)arg;
+    Map_Insert(fixture_ptr->M, fixture_ptr->content->title,
+               fixture_ptr->content->value);
+    return NULL;
+}
+
+int test_multithreaded_insert_map() {
+    map_t* M = BeforeEachMap();
+    pthread_t thr[FIXTURESIZE];
+    thread_insert_map_arg_t args[FIXTURESIZE];
+    // Prepare arguments
+    for (int i = 0; i < FIXTURESIZE; i++) {
+        args[i] = (thread_insert_map_arg_t){M, &fixture[i]};
+    }
+    
+    // Fork
+    for (int i = 0; i < FIXTURESIZE; i++) {
+        pthread_create(&thr[i], NULL, thread_insert_map, (void*)&args[i]);
+    }
+    // Join
+    for (int i = 0; i < FIXTURESIZE; i++) {
+        pthread_join(thr[i], NULL);
+    }
+    
+    // Test
+    int success = 0;
+    for (int i = 0; i < FIXTURESIZE; i++) {
+        linked_list_t* list = Map_Get(M, fixture[i].title);
+        if (list->size != 1) {
+            printf("Size is not one for key: %s\n", fixture[i].title);
+            success = 1;
+        }
+        if (strcmp(list->tail->title, fixture[i].title) != 0) {
+            printf("Title does not match: %s, %s\n", list->tail->title,
+                   fixture[i].title);
+            success = 1;
+        }
+        if (strcmp(list->tail->value, fixture[i].value) != 0) {
+            printf("Value does not match: %s, %s\n", list->tail->value,
+                   fixture[i].value);
+            success = 1;
+        }
+        if (list->tail->next != NULL) {
+            printf("Next node after tail is not NULL\n");
+            success = 1;
+        }
+        if (list->tail->book_next != NULL) {
+            printf("Book Next node after tail is not NULL\n");
+            success = 1;
+        }
+    }
+    if (success == 1)
+        printf("Failed: test_multithreaded_insert_map\n");
+    AfterEachMap(M);
     return success;
 }
 
@@ -143,10 +224,14 @@ int main() {
     run_tests += 1;
     failed_tests += test_contain_non_empty_list_does_not_exist_return_false();
 
-    // Test multi-threaded insert
+    // Test multi-threaded insert list 
     run_tests += 1;
-    failed_tests += test_multi_threaded_insert();
+    failed_tests += test_multithreaded_insert_list();
 
-    printf("Failed tests: %d, Passed tests: %d\n", failed_tests,
-           run_tests - failed_tests);
+    // Test multi-threaded insert map 
+    run_tests += 1; 
+    failed_tests += test_multithreaded_insert_map();
+
+    printf("Passed tests: %d, Failed tests: %d\n",
+           run_tests - failed_tests, failed_tests);
 }

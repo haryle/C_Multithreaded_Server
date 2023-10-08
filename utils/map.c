@@ -78,7 +78,7 @@ void List_Free(linked_list_t* LL) {
     pthread_mutex_unlock(&LL->lock);
 }
 
-unsigned long hash(char* str) {
+int hash(char* str) {
     // One-byte-at-a-time hash based on Murmur's mix
     // Source: https://github.com/aappleby/smhasher/blob/master/src/Hashes.cpp
     unsigned long h = (int)SEED;
@@ -87,7 +87,7 @@ unsigned long hash(char* str) {
         h *= 0x5bd1e995;
         h ^= h >> 15;
     }
-    return h;
+    return h % CAPACITY;
 }
 
 void Map_Init(map_t* M) {
@@ -96,7 +96,7 @@ void Map_Init(map_t* M) {
 }
 
 int Map_Insert(map_t* M, char* title, char* value) {
-    unsigned long index = hash(title);
+    int index = hash(title);
     return List_Insert(&M->lists[index], title, value);
 }
 

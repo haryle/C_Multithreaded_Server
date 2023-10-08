@@ -2,7 +2,7 @@
 #include <stdbool.h>
 
 #ifndef CAPACITY
-    #define CAPACITY 100000
+    #define CAPACITY 500000
 #endif
 
 /*
@@ -85,7 +85,7 @@ Create a hash of the input string
 Arguments:
 str - string to create a hash out of 
 */
-unsigned long hash(char* str);
+int hash(char* str);
 
 /*
 Thread-safe hashmap data structure 
