@@ -1,0 +1,13 @@
+COMP SCI 7007 - Specialised Programming
+Hide Course Details
+
+Career:	Postgraduate Coursework
+Units:	3
+Term:	Semester 1
+Campus:	North Terrace
+Contact:	Up to 5 hours per week
+Available for Study Abroad and Exchange:	Yes
+Available for Non-Award Study:	Yes
+Assessment:	Practical exam and/or assignments
+Syllabus:	
+Computational problem-solving with a focus on group learning and practice. Lecture topics cover general solution categories including: brute-force, divide and conquer, dynamic programming, greedy algorithms and search techniques

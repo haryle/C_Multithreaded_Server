@@ -1,0 +1,14 @@
+COMP SCI 4416 - Applied Machine Learning UG
+Hide Course Details
+
+Career:	Undergraduate
+Units:	3
+Term:	Semester 2
+Campus:	North Terrace
+Contact:	Up to 3 hours per week
+Restriction:	Software Engineering Students only
+Available for Study Abroad and Exchange:	No
+Available for Non-Award Study:	No
+Assessment:	Assignment/project based
+Syllabus:	
+This course surveys the practical application of machine learning in modern organisations and society. Case studies will be used to demonstrate current best practice as well as common pitfalls. You will learn processes for tool-selection based on requirements and available resources; verifying and validating discovered models and how to apply results in real environments; and information resources for tracking technological advances.

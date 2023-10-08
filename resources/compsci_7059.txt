@@ -1,0 +1,16 @@
+
+COMP SCI 7059 - Artificial Intelligence
+Hide Course Details
+
+Career:	Postgraduate Coursework
+Units:	3
+Term:	Semester 1
+Campus:	North Terrace
+Contact:	Up to 2.5 hours per week
+Available for Study Abroad and Exchange:	Yes
+Available for Non-Award Study:	No
+Pre-Requisite:	COMP SCI 7103, COMP SCI 7202, COMP SCI 7202B, COMP SCI 7208 or COMP SCI 7211 or COMP SCI 7201
+Assumed Knowledge:	COMP SCI 7082 or COMP SCI 7201
+Assessment:	Written exam and/or assignments
+Syllabus:	
+This is an introductory course on Artificial Intelligence. The topics may include: AI methodology and fundamentals; intelligent agents; search algorithms; game playing; machine learning; uncertainty and probability theory; probabilistic reasoning in AI; Bayesian networks; decision making, and reinforcement learning. Several assignments will be given to enable the student to gain practical experience in using these techniques.

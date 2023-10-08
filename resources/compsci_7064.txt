@@ -1,0 +1,15 @@
+COMP SCI 7064 - Operating Systems
+Hide Course Details
+
+Career:	Postgraduate Coursework
+Units:	3
+Term:	Semester 2
+Campus:	North Terrace
+Contact:	Up to 2.5 hours per week
+Available for Study Abroad and Exchange:	Yes
+Available for Non-Award Study:	No
+Pre-Requisite:	COMP SCI 7103, COMP SCI 7202, COMP SCI 7202B, COMP SCI 7208 or COMP SCI 7211
+Assumed Knowledge:	COMP SCI 7081, exposure to C programming as in COMP SCI 7088 & one of COMP SCI 7082 or COMP SCI 7201
+Assessment:	Written exam and/or assignments
+Syllabus:	
+OS purposes: resource management and the extended virtual computer; historical development. Processes: critical sections and mutual exclusion, semaphores, monitors, classical problems, deadlock; process scheduling. Input and Output: hardware and software control. Memory management: multi-programming; swapping; virtual memory, paging and symbolic segmentation; File System: operations, implementation, performance. Operating System Security and Protection mechanisms: protection domains, access lists, capability systems, principle of minimum privilege, security threats and attacks, encryption, and authentication.

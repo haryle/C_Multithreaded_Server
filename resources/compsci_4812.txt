@@ -1,0 +1,16 @@
+
+COMP SCI 4812 - Secure Software Engineering
+Hide Course Details
+
+Career:	Undergraduate
+Units:	3
+Term:	Semester 2
+Campus:	North Terrace
+Contact:	Up to 3 hours per week
+Available for Study Abroad and Exchange:	Yes
+Available for Non-Award Study:	No
+Pre-Requisite:	COMP SCI 2201
+Incompatible:	COMP SCI 4412
+Assessment:	Written exam and / or assignments
+Syllabus:	
+This course will introduce the theoretical concepts and practical approaches and tools that support the security concerns in the whole systems development lifecycle resulting in software that is secure by default. The course will cover a wide range of software security topics ranging from as security as a cross-cutting concern, methodological approaches to improving software security during different phases of software development lifecycle, integrating secure software development principles and patterns into software development processes, contemporary paradigm of secure continuous software engineering, DevSecOps. The course will be offered in a workshop style mode with small and large parts of software development projects being the major types of assessment tasks.

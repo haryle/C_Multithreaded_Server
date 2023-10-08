@@ -1,0 +1,15 @@
+COMP SCI 7076 - Distributed Systems
+Hide Course Details
+
+Career:	Postgraduate Coursework
+Units:	3
+Term:	Semester 2
+Campus:	North Terrace
+Contact:	Up to 2.5 hours per week
+Available for Study Abroad and Exchange:	Yes
+Available for Non-Award Study:	No
+Pre-Requisite:	COMP SCI 7103, COMP SCI 7202, COMP SCI 7202B, COMP SCI 7208 or COMP SCI 7211
+Assumed Knowledge:	COMP SCI 7081 & COMP SCI 7082 or COMP SCI 7201
+Assessment:	Assignments and/or group projects
+Syllabus:	
+A selection of topics from the following: the challenges faced in constructing client/server software: partial system failures, multiple address spaces, absence of a single clock, latency of communication, heterogeneity, absence of a trusted operating system, system management, binding and naming. Techniques for meeting these challenges: RPC and middleware, naming and directory services, distributed transaction processing, 'thin' clients, data replication, cryptographic security, mobile code. Introduction to Java RMI.

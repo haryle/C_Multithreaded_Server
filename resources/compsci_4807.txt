@@ -1,0 +1,15 @@
+COMP SCI 4807 - Advanced Algorithms
+Hide Course Details
+
+Career:	Undergraduate
+Units:	3
+Term:	Semester 1
+Campus:	North Terrace
+Contact:	2 hours per week
+Available for Study Abroad and Exchange:	No
+Available for Non-Award Study:	No
+Pre-Requisite:	COMP SCI 2201
+Incompatible:	COMP SCI 3301, COMP SCI 4407
+Assessment:	Written exam and/or assignments
+Syllabus:	
+The development of a sound theoretical understanding of advanced algorithms and practical problem solving skills using them. Advanced algorithm topics chosen from: Dynamic Programming, Linear Programming, Matching, Max Flow / Min Cut, P and NP, Approximation Algorithms, Randomized Algorithms, Computational Geometry.

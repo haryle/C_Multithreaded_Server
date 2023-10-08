@@ -1,0 +1,14 @@
+COMP SCI 4417 - Applied Natural Language Processing UG
+Hide Course Details
+
+Career:	Undergraduate
+Units:	3
+Term:	Semester 1
+Campus:	North Terrace
+Contact:	Up to 3 hours per week
+Restriction:	Software Engineering Students only
+Available for Study Abroad and Exchange:	No
+Available for Non-Award Study:	No
+Assessment:	Assignments, exam
+Syllabus:	
+This course examines machine learning techniques that obtain leading results on the problem of natural language processing (NLP). NLP is a critical step towards effective communication between people and machines. You will learn how to represent words and text, the use of deep recurrent models for text prediction, and issues that separate NLP from other application domains. This will be reinforced by applying deep learning tools to NLP through examples and practical projects

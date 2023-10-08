@@ -1,0 +1,14 @@
+COMP SCI 7092 - Mobile and Wireless Systems
+Hide Course Details
+
+Career:	Postgraduate Coursework
+Units:	3
+Term:	Semester 2
+Campus:	North Terrace
+Contact:	Up to 2 hours per week
+Available for Study Abroad and Exchange:	Yes
+Available for Non-Award Study:	No
+Assumed Knowledge:	Internet protocols, architecture and basic network performance analysis as taught in COMP SCI 7039
+Assessment:	Assignments and/or group projects
+Syllabus:	
+This course examines the characteristics of mobile and wireless networks and the impact of these characteristics on the development of software and supporting protocols. Topics covered include: mobile and wireless application design and development environments, middleware support, protocol requirements for ad-hoc and sensor networks, wireless & mobile security vulnerabilities and standards, supporting reliable communication in lossy and intermittently connected networks; challenges and architectures for wireless mobility - 4G networks, Wi-Fi, Wi-Max, Bluetooth, Mobile IP, convergence of voice and data networks.

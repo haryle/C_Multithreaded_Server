@@ -1,0 +1,16 @@
+COMP SCI 4811 - Event Driven Computing
+Hide Course Details
+
+Career:	Undergraduate
+Units:	3
+Term:	Semester 2
+Campus:	North Terrace
+Contact:	Up to 2.5 hours per week
+Available for Study Abroad and Exchange:	Yes
+Available for Non-Award Study:	No
+Pre-Requisite:	COMP SCI 2201
+Assumed Knowledge:	COMP SCI 2103
+Incompatible:	COMP SCI 4411
+Assessment:	Written exam and/or assignments
+Syllabus:	
+Event-driven systems are the backbone of modern computer systems and services. This course explores the fundamental principles behind these systems; Finite State Automata, their behaviour and implementation; Correspondence with regular expressions; Examples of embedded systems; Introduction to interconnected state machines, Petri Nets, and concurrency. We'll also explore modern approaches to event-driven systems; Reactive Programming; event streams, and observable data.

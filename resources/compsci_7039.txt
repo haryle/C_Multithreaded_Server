@@ -1,0 +1,15 @@
+COMP SCI 7039 - Computer Networks & Applications
+Hide Course Details
+
+Career:	Postgraduate Coursework
+Units:	3
+Term:	Semester 1
+Campus:	North Terrace
+Contact:	Up to 2.5 hours per week
+Available for Study Abroad and Exchange:	Yes
+Available for Non-Award Study:	No
+Pre-Requisite:	COMP SCI 7103, COMP SCI 7202, COMP SCI 7202B, COMP SCI 7208 or COMP SCI 7211
+Assumed Knowledge:	COMP SCI 7082 or COMP SCI 7201
+Assessment:	Written exam and/or assignments
+Syllabus:	
+Introduction to networks and digital communications with a focus on Internet protocols: Application layer architectures (client/server, peer-to-peer) and protocols (HTTP-web, SMTP-mail, etc), Transport layer operation: (reliable transport, congestion and flow control, UDP, TCP); Network layer operation - (routing, addressing, IPv4 and IPv6), Data Link layer operation (error detection/correction, access control, Ethernet, 802.11), Layer 2/3 protocols (MPLS); security, selected current topics such as: multimedia protocols, quality of Service, mobility, wireless networking, emerging protocols, network management.
