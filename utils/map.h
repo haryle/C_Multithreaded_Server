@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <stdbool.h>
 
 #ifndef CAPACITY
     #define CAPACITY 100000
@@ -35,6 +36,7 @@ typedef struct ___linked_list_t {
     node_t* head;          // ptr to the head of the list
     node_t* tail;          // ptr to the tail of the list
     pthread_mutex_t lock;  // list lock
+    int size;              // list size
 } linked_list_t;
 
 /*
@@ -55,6 +57,19 @@ Returns:
 1 - if the operation fails 
 */
 int List_Insert(linked_list_t* LL, char* title, char* value);
+
+/*
+Check if list contains a title
+
+Arguments: 
+LL - pointer to the linked list 
+title - string book title to search 
+
+Returns: 
+true - if the list contains any node with the same title 
+false - otherwise 
+*/
+bool List_Contains(linked_list_t* LL, char* title);
 
 /*
 Free up memory of the linked list 
@@ -101,3 +116,8 @@ int Map_Insert(map_t* M, char* title, char* value);
 
 /* Free map memory */
 void Map_Free(map_t* M);
+
+/*
+Get LinkedList corresponding to title 
+*/
+linked_list_t* Map_Get(map_t* M, char* title);
