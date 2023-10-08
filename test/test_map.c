@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include "../utils/map.h"
 #define FIXTURESIZE 10
 #define _GNU_SOURCE
