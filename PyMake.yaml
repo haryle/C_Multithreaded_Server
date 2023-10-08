@@ -1,0 +1,10 @@
+test_util:
+  var:
+    basic:
+      name: null 
+      src: utils
+      out: out 
+      test_src: test 
+  cmd:
+    - gcc -Wall $(test_src)/test_$(name).c $(src)/$(name).c -o $(out)/test_$(name).o -pthread
+    - ./$(out)/test_$(name).o
