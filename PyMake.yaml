@@ -1,10 +1,19 @@
-test_util:
+test_map:
   var:
     basic:
-      name: null 
       src: utils
       out: out 
       test_src: test 
   cmd:
-    - gcc -Wall $(test_src)/test_$(name).c $(src)/$(name).c -o $(out)/test_$(name).o -pthread
-    - ./$(out)/test_$(name).o
+    - gcc -Wall $(test_src)/test_map.c $(src)/map.c -o $(out)/test_map.o -pthread
+    - ./$(out)/test_map.o
+
+test_list:
+  var:
+    basic:
+      src: utils
+      out: out 
+      test_src: test 
+  cmd:
+    - gcc -Wall $(src)/map.c $(src)/list.c $(test_src)/test_list.c -o $(out)/test_list.o -pthread
+    - ./$(out)/test_list.o
