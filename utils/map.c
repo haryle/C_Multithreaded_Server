@@ -52,11 +52,12 @@ int List_Insert(linked_list_t* LL, char* title, char* value) {
     return 0;
 }
 
-bool List_Contains(linked_list_t* LL, char* title) {
+bool List_Contains(linked_list_t* LL, char* title, char* value) {
     pthread_mutex_lock(&LL->lock);
     node_t* current_node = LL->head;
     while (current_node != NULL) {
-        if (strcmp(title, current_node->title) == 0) {
+        if ((strcmp(title, current_node->title) == 0) &&
+            (strcmp(value, current_node->value) == 0)) {
             pthread_mutex_unlock(&LL->lock);
             return true;
         }
@@ -107,4 +108,18 @@ void Map_Free(map_t* M) {
 
 linked_list_t* Map_Get(map_t* M, char* title) {
     return &M->lists[hash(title)];
+}
+
+node_t* List_Head(linked_list_t* L) {
+    pthread_mutex_lock(&L->lock);
+    node_t* head = L->head;
+    pthread_mutex_unlock(&L->lock);
+    return head;
+}
+
+node_t* List_Tail(linked_list_t* L) {
+    pthread_mutex_lock(&L->lock);
+    node_t* tail = L->tail;
+    pthread_mutex_unlock(&L->lock);
+    return tail;
 }

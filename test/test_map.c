@@ -3,6 +3,7 @@
 #include <string.h>
 #include "../utils/map.h"
 #define FIXTURESIZE 10
+#define _GNU_SOURCE
 
 typedef struct ___content_t {
     char* title;
@@ -47,8 +48,8 @@ int test_insert(int start, int end) {
     linked_list_t* LL = BeforeEachList();
     for (int i = start; i <= end; i++)
         List_Insert(LL, fixture[i].title, fixture[i].value);
-    node_t* head = LL->head;
-    node_t* tail = LL->tail;
+    node_t* head = List_Head(LL);
+    node_t* tail = List_Tail(LL);
     int result = 0;
     if (strcmp(head->title, fixture[start].title) != 0) {
         printf("Head Title:%s, %s\n", head->title, fixture[start].title);
@@ -82,7 +83,7 @@ int test_insert(int start, int end) {
 int test_contain_empty_list_return_false() {
     linked_list_t* L = BeforeEachList();
     int success = 0;
-    if (List_Contains(L, "COMPSCI2203"))
+    if (List_Contains(L, "COMPSCI2203", "Problem Solving & Software Development"))
         success = 1;
     if (success == 1)
         printf("Failed: test_contain_empty_list_return_false");
@@ -94,7 +95,7 @@ int test_contain_non_empty_list_does_not_exist_return_false() {
     linked_list_t* L = BeforeEachList();
     List_Insert(L, fixture[0].title, fixture[0].value);
     int success = 0;
-    if (List_Contains(L, "COMPSCI2203"))
+    if (List_Contains(L, "COMPSCI2203", "Problem Solving & Software Development"))
         success = 1;
     if (success == 1)
         printf(
@@ -129,7 +130,7 @@ int test_multithreaded_insert_list() {
     // Test
     int success = 0;
     for (int i = 0; i < FIXTURESIZE; i++) {
-        if (!List_Contains(L, fixture[i].title)) {
+        if (!List_Contains(L, fixture[i].title, fixture[i].value)) {
             printf("List does not contain title: %s\n", fixture[i].title);
             success = 1;
         }
@@ -167,7 +168,7 @@ int test_multithreaded_insert_map() {
     for (int i = 0; i < FIXTURESIZE; i++) {
         args[i] = (thread_insert_map_arg_t){M, &fixture[i]};
     }
-    
+
     // Fork
     for (int i = 0; i < FIXTURESIZE; i++) {
         pthread_create(&thr[i], NULL, thread_insert_map, (void*)&args[i]);
@@ -176,30 +177,31 @@ int test_multithreaded_insert_map() {
     for (int i = 0; i < FIXTURESIZE; i++) {
         pthread_join(thr[i], NULL);
     }
-    
+
     // Test
     int success = 0;
     for (int i = 0; i < FIXTURESIZE; i++) {
         linked_list_t* list = Map_Get(M, fixture[i].title);
+        node_t* tail = List_Tail(list);
         if (list->size != 1) {
             printf("Size is not one for key: %s\n", fixture[i].title);
             success = 1;
         }
-        if (strcmp(list->tail->title, fixture[i].title) != 0) {
-            printf("Title does not match: %s, %s\n", list->tail->title,
+        if (strcmp(tail->title, fixture[i].title) != 0) {
+            printf("Title does not match: %s, %s\n", tail->title,
                    fixture[i].title);
             success = 1;
         }
-        if (strcmp(list->tail->value, fixture[i].value) != 0) {
-            printf("Value does not match: %s, %s\n", list->tail->value,
+        if (strcmp(tail->value, fixture[i].value) != 0) {
+            printf("Value does not match: %s, %s\n", tail->value,
                    fixture[i].value);
             success = 1;
         }
-        if (list->tail->next != NULL) {
+        if (tail->next != NULL) {
             printf("Next node after tail is not NULL\n");
             success = 1;
         }
-        if (list->tail->book_next != NULL) {
+        if (tail->book_next != NULL) {
             printf("Book Next node after tail is not NULL\n");
             success = 1;
         }
@@ -208,6 +210,63 @@ int test_multithreaded_insert_map() {
         printf("Failed: test_multithreaded_insert_map\n");
     AfterEachMap(M);
     return success;
+}
+
+// Test readline from file 
+
+int test_read_from_file(){
+    map_t * M = BeforeEachMap();
+    char * line = NULL;
+    FILE * fp;
+    size_t len = 0;
+    ssize_t read;
+    char* title = "test_input.txt";
+    char dir[100];
+    sprintf(dir, "resources/%s", title);
+
+    // First pass - read data 
+    fp = fopen(dir, "r");
+    if (fp == NULL)
+        return 1;
+    while ((read = getline(&line, &len, fp))!= -1){
+        Map_Insert(M, title, line);
+    }
+    fclose(fp);
+
+    // Second pass - compare line by line
+    int success = 0;  
+    fp = fopen(dir, "r");
+    if (fp == NULL)
+        return 1;
+
+    linked_list_t* list = Map_Get(M, title);
+    
+    node_t* current = List_Head(list);
+
+    while ((read = getline(&line, &len, fp))!= -1){
+        if (current == NULL){
+            printf("Current node is NULL. Not supposed to be NULL\n");
+            success = 1;
+            break;
+        }
+        if (strcmp(current->value, line) != 0){
+            printf("Different: %s, %s\n", current->value, line);
+            success = 1;
+            break;
+        }
+        current = current->book_next;
+    }
+    if (current != NULL){
+        printf("Current node is NOT NULL. Supposed to be NULL\n");
+        success = 1;
+    }
+
+    // Free resources 
+    if (line)
+        free(line);
+
+    AfterEachMap(M);
+    return success; 
 }
 
 int main() {
@@ -224,14 +283,19 @@ int main() {
     run_tests += 1;
     failed_tests += test_contain_non_empty_list_does_not_exist_return_false();
 
-    // Test multi-threaded insert list 
+    // Test multi-threaded insert list
     run_tests += 1;
     failed_tests += test_multithreaded_insert_list();
 
-    // Test multi-threaded insert map 
-    run_tests += 1; 
+    // Test multi-threaded insert map
+    run_tests += 1;
     failed_tests += test_multithreaded_insert_map();
 
-    printf("Passed tests: %d, Failed tests: %d\n",
-           run_tests - failed_tests, failed_tests);
+    // Test read from file: 
+    run_tests += 1;
+    failed_tests += test_read_from_file();
+
+    printf("Passed tests: %d, Failed tests: %d\n", run_tests - failed_tests,
+           failed_tests);
+        
 }

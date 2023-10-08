@@ -39,6 +39,16 @@ typedef struct ___linked_list_t {
     int size;              // list size
 } linked_list_t;
 
+/* 
+Get the head node of the list
+*/
+node_t* List_Head(linked_list_t* L);
+
+/*
+Get the tail node of the list 
+*/
+node_t* List_Tail(linked_list_t* L);
+
 /*
 Initialise linked list 
 */
@@ -64,12 +74,13 @@ Check if list contains a title
 Arguments: 
 LL - pointer to the linked list 
 title - string book title to search 
+value - string book content 
 
 Returns: 
 true - if the list contains any node with the same title 
 false - otherwise 
 */
-bool List_Contains(linked_list_t* LL, char* title);
+bool List_Contains(linked_list_t* LL, char* title, char* value);
 
 /*
 Free up memory of the linked list 
