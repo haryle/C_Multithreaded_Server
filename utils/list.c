@@ -1,7 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "list.h"
 
+
 void Concurrent_List_Init(list_t* L) {
-    L->map = (map_t*)malloc(sizeof(map_t));
+    L->map = (map_t*) malloc(sizeof(map_t));
     Map_Init(L->map);
     L->head = L->tail = NULL;
     L->size = 0;
@@ -26,7 +30,7 @@ int Concurrent_List_Insert(list_t* L, char* title, char* value) {
         L->tail->next = tail;
         L->tail = tail;
     }
-    pthread_mutex_lock(&L->tail_lock);
+    pthread_mutex_unlock(&L->tail_lock);
     return 0;
 }
 
