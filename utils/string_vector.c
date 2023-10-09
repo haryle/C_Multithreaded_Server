@@ -1,14 +1,9 @@
 #include "string_vector.h"
 #include <stdlib.h>
+#include <stdio.h>
 
-typedef struct ____string_vector_t {
-    char* message;    // Message pointer
-    size_t size;      // Current message size
-    size_t max_size;  // Maximum allocated
-} string_vector_t;
-
-void Vector_Init(string_vector_t* V) {
-    char* message = (char*)malloc((VECTORSIZE + 1) * sizeof(char));
+void Vector_Init(string_vector_t* V, int size) {
+    char* message = (char*)malloc((size + 1) * sizeof(char));
     if (message == NULL) {
         perror("malloc");
         V->message = NULL;
@@ -18,12 +13,12 @@ void Vector_Init(string_vector_t* V) {
         V->message = message;
         V->message[0] = '\0';
         V->size = 0;
-        V->max_size = VECTORSIZE;
+        V->max_size = size;
     }
 }
 
 int Vector_Resize(string_vector_t* V) {
-    char* ptr = (char*)realloc(V->message, V->max_size * 2);
+    char* ptr = (char*)realloc(V->message, V->max_size * 2 + 1);
     if (ptr == NULL) {
         perror("realloc");
         return -1;
