@@ -73,3 +73,7 @@ Returns:
 true if there is a node with those values
 */
 bool Concurrent_List_Contains(list_t*L, char* title, char* value);
+
+
+
+void Concurrent_List_Write_Book(list_t*L, char* title, int book_id);

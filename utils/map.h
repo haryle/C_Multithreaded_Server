@@ -91,6 +91,15 @@ LL - pointer to the linked list to free memory of
 void List_Free(linked_list_t* LL);
 
 /*
+Write List Content to text file
+
+Argument:
+LL - pointer to the linked list with content 
+book_id: name of book
+*/
+void List_Write_Book(linked_list_t* LL, int book_id);
+
+/*
 Create a hash of the input string 
 
 Arguments:

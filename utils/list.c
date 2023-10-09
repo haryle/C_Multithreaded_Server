@@ -1,11 +1,10 @@
+#include "list.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "list.h"
-
 
 void Concurrent_List_Init(list_t* L) {
-    L->map = (map_t*) malloc(sizeof(map_t));
+    L->map = (map_t*)malloc(sizeof(map_t));
     Map_Init(L->map);
     L->head = L->tail = NULL;
     L->size = 0;
@@ -61,4 +60,9 @@ bool Concurrent_List_Contains_Inefficient(list_t* L, char* title, char* value) {
 bool Concurrent_List_Contains(list_t* L, char* title, char* value) {
     linked_list_t* list = Map_Get(L->map, title);
     return List_Contains(list, title, value);
+}
+
+void Concurrent_List_Write_Book(list_t* L, char* title, int book_id) {
+    linked_list_t* list = Concurrent_List_Get_Book(L, title);
+    List_Write_Book(list, book_id);
 }
