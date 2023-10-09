@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <pthread.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -8,7 +9,6 @@
 #include <unistd.h>
 #include "../utils/list.h"
 #include "../utils/string_vector.h"
-
 #ifndef PORT
     #define PORT 8080
 #endif
@@ -36,7 +36,20 @@ void handle_SIGINT(int sig) {
     exit(0);
 }
 
-// Process buffer:
+/*
+Process buffer at every recv call.
+
+Buffer is separated by the new line character. Every new line is added to the
+concurrent list in a sequential order. The first read line is treated as the 
+title 
+
+Arguments:
+    vector: string builder object 
+    buffer: filled buffer
+    size: size of buffer 
+    title: book title ptr 
+    num_parsed_line: ptr to number of lines that have been parsed
+*/
 void process_buffer(string_vector_t* vector, char* buffer, int size,
                     char** title, int* num_parsed_lines) {
     char* content;
@@ -68,18 +81,22 @@ void process_buffer(string_vector_t* vector, char* buffer, int size,
     Vector_Append(vector, temp);
 }
 
-void func(int connfd) {
+/*
+Connection runnable task to be handled by each thread
+*/
+void* connection_runnable(void* arg) {
+    int* connfd = (int*)arg;
     char buff[MAX];
     int read_len, num_parsed_lines = 0;
     char* title = NULL;
     string_vector_t* vector = (string_vector_t*)malloc(sizeof(string_vector_t));
     Vector_Init(vector, VECTORSIZE);
-    // infinite loop for chat
+    // Recv data loop
     while (true) {
         signal(SIGINT, handle_SIGINT);
         bzero(buff, MAX);
         // read the message from client and copy it in buffer
-        read_len = recv(connfd, buff, sizeof(buff), 0);
+        read_len = recv(*connfd, buff, sizeof(buff), 0);
         // process the buffer
         process_buffer(vector, buff, read_len, &title, &num_parsed_lines);
         if (read_len == 0) {
@@ -88,7 +105,7 @@ void func(int connfd) {
         }
     }
     printf("Closing client socket\n");
-    close(connfd);
+    close(*connfd);
     Vector_Free(vector);
     free(vector);
     if (title != NULL)
