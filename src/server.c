@@ -15,14 +15,20 @@
 #define LISTEN_BACKLOG 50
 #define MAX 10
 #define VECTORSIZE 1024
+#define MAXTHREADCOUNT 50
 #define handle_error(msg)   \
     do {                    \
         perror(msg);        \
         exit(EXIT_FAILURE); \
     } while (0)
 
-int server_socket;
-list_t List;
+int server_socket;  // Server socket file descriptor
+list_t List;        // Concurrent List Data Structure
+
+typedef struct ___runnable_param_t {
+    int client_socket;
+    int thread_id;
+} runnable_param_t;
 
 // Release the socket
 void shutdown_server() {
@@ -65,6 +71,8 @@ void process_buffer(string_vector_t* vector, char* buffer, int size,
             Vector_Append(vector, temp);
             //Insert to concurrent list
             content = Vector_Flush(vector);
+            // Display to stdout new node:
+            printf("New node - title: %s content: %s\n", *title, content);
             if (*num_parsed_lines == 0)
                 *title = content;
             Concurrent_List_Insert(&List, *title, content);
@@ -85,7 +93,8 @@ void process_buffer(string_vector_t* vector, char* buffer, int size,
 Connection runnable task to be handled by each thread
 */
 void* connection_runnable(void* arg) {
-    int* connfd = (int*)arg;
+    runnable_param_t* argv = (runnable_param_t*)arg;
+    int connfd = argv->client_socket;
     char buff[MAX];
     int read_len, num_parsed_lines = 0;
     char* title = NULL;
@@ -93,10 +102,10 @@ void* connection_runnable(void* arg) {
     Vector_Init(vector, VECTORSIZE);
     // Recv data loop
     while (true) {
-        signal(SIGINT, handle_SIGINT);
+        // Clear buffer
         bzero(buff, MAX);
         // read the message from client and copy it in buffer
-        read_len = recv(*connfd, buff, sizeof(buff), 0);
+        read_len = recv(connfd, buff, sizeof(buff), 0);
         // process the buffer
         process_buffer(vector, buff, read_len, &title, &num_parsed_lines);
         if (read_len == 0) {
@@ -104,12 +113,16 @@ void* connection_runnable(void* arg) {
             break;
         }
     }
+    // Write to file
+    Concurrent_List_Write_Book(&List, title, argv->thread_id);
+    // Collect Garbage
     printf("Closing client socket\n");
-    close(*connfd);
+    close(connfd);
     Vector_Free(vector);
     free(vector);
     if (title != NULL)
         free(title);
+    return NULL;
 }
 
 int main(void) {
@@ -150,12 +163,16 @@ int main(void) {
 
     // /* Now we can accept incoming connections one
     //           at a time using accept(2). */
-    addr_size = sizeof(client_addr);
-    client_socket =
-        accept(server_socket, (struct sockaddr*)&client_addr, &addr_size);
-    if (client_socket == -1)
-        handle_error("accept");
-
-    func(client_socket);
-    shutdown_server();
+    int thread_id = 0;
+    while (true) {
+        signal(SIGINT, handle_SIGINT);
+        addr_size = sizeof(client_addr);
+        client_socket =
+            accept(server_socket, (struct sockaddr*)&client_addr, &addr_size);
+        if (client_socket == -1)
+            handle_error("accept");
+        runnable_param_t param = (runnable_param_t){client_socket, thread_id++};
+        pthread_t thr;
+        pthread_create(&thr, NULL, connection_runnable, (void*)&param);
+    }
 }
