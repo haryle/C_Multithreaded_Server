@@ -17,3 +17,23 @@ test_list:
   cmd:
     - gcc -Wall $(src)/map.c $(src)/list.c $(test_src)/test_list.c -o $(out)/test_list.o -pthread
     - ./$(out)/test_list.o
+
+server:
+  var:
+    basic:
+      port: 8080
+      src: src 
+      out: out
+  cmd:
+    - gcc -Wall $(src)/server.c -o $(out)/server.o -pthread -DPORT=$(port)
+    - ./$(out)/server.o
+
+client:
+  var:
+    basic:
+      port: 8080
+      src: src 
+      out: out
+  cmd:
+    - gcc -Wall $(src)/client.c -o $(out)/client.o -pthread -DPORT=$(port)
+    - ./$(out)/client.o
