@@ -27,7 +27,7 @@ server:
       out: out
       utils: utils
   cmd:
-    - gcc -Wall $(utils)/list.c $(utils)/map.c $(src)/server.c -o $(out)/server.o -pthread -DPORT=$(port)
+    - gcc -Wall $(utils)/string_vector.c $(utils)/list.c $(utils)/map.c $(src)/server.c -o $(out)/server.o -pthread -DPORT=$(port)
     - ./$(out)/server.o
 
 program:

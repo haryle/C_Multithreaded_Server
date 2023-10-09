@@ -7,11 +7,14 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "../utils/list.h"
+#include "../utils/string_vector.h"
+
 #ifndef PORT
     #define PORT 8080
 #endif
 #define LISTEN_BACKLOG 50
 #define MAX 10
+#define VECTORSIZE 1024
 #define handle_error(msg)   \
     do {                    \
         perror(msg);        \
@@ -33,18 +36,52 @@ void handle_SIGINT(int sig) {
     exit(0);
 }
 
+// Process buffer:
+void process_buffer(string_vector_t* vector, char* buffer, int size,
+                    char** title, int* num_parsed_lines) {
+    char* content;
+    char temp[size];
+    int temp_idx = 0;
+    // Check for new line
+    for (int i = 0; i < size; i++) {
+        temp[temp_idx] = buffer[i];
+        temp_idx++;
+        if (buffer[i] == '\n') {
+            //Complete the current line and append to vector
+            temp[temp_idx] = '\0';
+            Vector_Append(vector, temp);
+            //Insert to concurrent list
+            content = Vector_Flush(vector);
+            if (*num_parsed_lines == 0)
+                *title = content;
+            Concurrent_List_Insert(&List, *title, content);
+            // Free content if it is not title
+            if (*num_parsed_lines != 0)
+                free(content);
+            *num_parsed_lines += 1;
+            //Reset index:
+            temp_idx = 0;
+        }
+    }
+    // Add remaining temp buffer:
+    temp[temp_idx] = '\0';
+    Vector_Append(vector, temp);
+}
+
 void func(int connfd) {
     char buff[MAX];
-    int read_len;
+    int read_len, num_parsed_lines = 0;
+    char* title = NULL;
+    string_vector_t* vector = (string_vector_t*)malloc(sizeof(string_vector_t));
+    Vector_Init(vector, VECTORSIZE);
     // infinite loop for chat
     while (true) {
         signal(SIGINT, handle_SIGINT);
         bzero(buff, MAX);
         // read the message from client and copy it in buffer
         read_len = recv(connfd, buff, sizeof(buff), 0);
-        // print buffer which contains the client contents
-        printf("Received: %s\n", buff);
-        printf("Read Length: %d\n", read_len);
+        // process the buffer
+        process_buffer(vector, buff, read_len, &title, &num_parsed_lines);
         if (read_len == 0) {
             printf("Breaking Loop\n");
             break;
@@ -52,6 +89,10 @@ void func(int connfd) {
     }
     printf("Closing client socket\n");
     close(connfd);
+    Vector_Free(vector);
+    free(vector);
+    if (title != NULL)
+        free(title);
 }
 
 int main(void) {
