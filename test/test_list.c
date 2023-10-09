@@ -41,7 +41,7 @@ void* thread_insert(void* arg) {
     return NULL;
 }
 
-list_t* BeforeEach() {
+list_t* before_each() {
     list_t* list = (list_t*)malloc(sizeof(list_t));
     Concurrent_List_Init(list);
     // Add data
@@ -61,14 +61,14 @@ list_t* BeforeEach() {
     return list;
 }
 
-void AfterEach(list_t* L) {
+void after_each(list_t* L) {
     Concurrent_List_Free(L);
     free(L);
 }
 
 int test_list_get_book(char* title) {
     int success = 0;
-    list_t* L = BeforeEach();
+    list_t* L = before_each();
 
     char* line = NULL;
     FILE* fp;
@@ -109,7 +109,7 @@ int test_list_get_book(char* title) {
     if (line)
         free(line);
 
-    AfterEach(L);
+    after_each(L);
     if (success == 1)
         printf("Fail: test_list_get_book with title: %s\n", title);
     return success;
@@ -117,7 +117,7 @@ int test_list_get_book(char* title) {
 
 int test_list_contains_node_inefficient(char* title) {
     int success = 0;
-    list_t* L = BeforeEach();
+    list_t* L = before_each();
 
     char* line = NULL;
     FILE* fp;
@@ -143,7 +143,7 @@ int test_list_contains_node_inefficient(char* title) {
     if (line)
         free(line);
 
-    AfterEach(L);
+    after_each(L);
     if (success == 1)
         printf("Fail: test_list_contains_node_inefficient with title: %s\n",
                title);
@@ -152,7 +152,7 @@ int test_list_contains_node_inefficient(char* title) {
 
 int test_list_contains_node_efficient(char* title) {
     int success = 0;
-    list_t* L = BeforeEach();
+    list_t* L = before_each();
 
     char* line = NULL;
     FILE* fp;
@@ -178,7 +178,7 @@ int test_list_contains_node_efficient(char* title) {
     if (line)
         free(line);
 
-    AfterEach(L);
+    after_each(L);
     if (success == 1)
         printf("Fail: test_list_contains_node_efficient with title: %s\n",
                title);
