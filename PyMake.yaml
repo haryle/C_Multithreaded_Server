@@ -8,15 +8,16 @@ test_map:
     - gcc -Wall $(test_src)/test_map.c $(src)/map.c -o $(out)/test_map.o -pthread
     - ./$(out)/test_map.o
 
-test_list:
+test:
   var:
     basic:
+      name: null
       src: utils
       out: out 
       test_src: test 
   cmd:
-    - gcc -Wall $(src)/map.c $(src)/list.c $(test_src)/test_list.c -o $(out)/test_list.o -pthread
-    - ./$(out)/test_list.o
+    - gcc -Wall $(src)/map.c $(src)/$(name).c $(test_src)/test_$(name).c -o $(out)/test_$(name).o -pthread
+    - ./$(out)/test_$(name).o
 
 server:
   var:
@@ -28,12 +29,13 @@ server:
     - gcc -Wall $(src)/server.c -o $(out)/server.o -pthread -DPORT=$(port)
     - ./$(out)/server.o
 
-client:
+program:
   var:
     basic:
+      name: null
       port: 8080
       src: src 
       out: out
   cmd:
-    - gcc -Wall $(src)/client.c -o $(out)/client.o -pthread -DPORT=$(port)
-    - ./$(out)/client.o
+    - gcc -Wall $(src)/$(name).c -o $(out)/$(name).o -pthread -DPORT=$(port)
+    - ./$(out)/$(name).o

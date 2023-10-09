@@ -3,6 +3,7 @@
         "stdio.h": "c",
         "map.h": "c",
         "list.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "system_error": "c"
     }
 }
