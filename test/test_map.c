@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <unistd.h>
 #include "../utils/map.h"
 #define FIXTURESIZE 10
 #define _GNU_SOURCE
@@ -84,7 +85,8 @@ int test_insert(int start, int end) {
 int test_contain_empty_list_return_false() {
     linked_list_t* L = BeforeEachList();
     int success = 0;
-    if (List_Contains(L, "COMPSCI2203", "Problem Solving & Software Development"))
+    if (List_Contains(L, "COMPSCI2203",
+                      "Problem Solving & Software Development"))
         success = 1;
     if (success == 1)
         printf("Failed: test_contain_empty_list_return_false");
@@ -96,7 +98,8 @@ int test_contain_non_empty_list_does_not_exist_return_false() {
     linked_list_t* L = BeforeEachList();
     List_Insert(L, fixture[0].title, fixture[0].value);
     int success = 0;
-    if (List_Contains(L, "COMPSCI2203", "Problem Solving & Software Development"))
+    if (List_Contains(L, "COMPSCI2203",
+                      "Problem Solving & Software Development"))
         success = 1;
     if (success == 1)
         printf(
@@ -143,13 +146,13 @@ int test_multithreaded_insert_list() {
 }
 
 // Test cases for map
-map_t* BeforeEachMap() {
+map_t* before_each_map() {
     map_t* M = (map_t*)malloc(sizeof(map_t));
     Map_Init(M);
     return M;
 }
 
-void AfterEachMap(map_t* M) {
+void after_each_map(map_t* M) {
     Map_Free(M);
     free(M);
 }
@@ -162,7 +165,7 @@ void* thread_insert_map(void* arg) {
 }
 
 int test_multithreaded_insert_map() {
-    map_t* M = BeforeEachMap();
+    map_t* M = before_each_map();
     pthread_t thr[FIXTURESIZE];
     thread_insert_map_arg_t args[FIXTURESIZE];
     // Prepare arguments
@@ -209,65 +212,104 @@ int test_multithreaded_insert_map() {
     }
     if (success == 1)
         printf("Failed: test_multithreaded_insert_map\n");
-    AfterEachMap(M);
+    after_each_map(M);
     return success;
 }
 
-// Test readline from file 
+// Test readline from file
 
-int test_read_from_file(){
-    map_t * M = BeforeEachMap();
-    char * line = NULL;
-    FILE * fp;
+int test_read_from_file() {
+    map_t* M = before_each_map();
+    char* line = NULL;
+    FILE* fp;
     size_t len = 0;
     ssize_t read;
     char* title = "test_input.txt";
     char dir[100];
     sprintf(dir, "resources/%s", title);
 
-    // First pass - read data 
+    // First pass - read data
     fp = fopen(dir, "r");
     if (fp == NULL)
         return 1;
-    while ((read = getline(&line, &len, fp))!= -1){
+    while ((read = getline(&line, &len, fp)) != -1) {
         Map_Insert(M, title, line);
     }
     fclose(fp);
 
     // Second pass - compare line by line
-    int success = 0;  
+    int success = 0;
     fp = fopen(dir, "r");
     if (fp == NULL)
         return 1;
 
     linked_list_t* list = Map_Get(M, title);
-    
+
     node_t* current = List_Head(list);
 
-    while ((read = getline(&line, &len, fp))!= -1){
-        if (current == NULL){
+    while ((read = getline(&line, &len, fp)) != -1) {
+        if (current == NULL) {
             printf("Current node is NULL. Not supposed to be NULL\n");
             success = 1;
             break;
         }
-        if (strcmp(current->value, line) != 0){
+        if (strcmp(current->value, line) != 0) {
             printf("Different: %s, %s\n", current->value, line);
             success = 1;
             break;
         }
         current = current->book_next;
     }
-    if (current != NULL){
+    if (current != NULL) {
         printf("Current node is NOT NULL. Supposed to be NULL\n");
         success = 1;
     }
 
-    // Free resources 
+    // Free resources
     if (line)
         free(line);
 
-    AfterEachMap(M);
-    return success; 
+    after_each_map(M);
+    return success;
+}
+
+int test_write_to_file() {
+    map_t* M = before_each_map();
+    char* line = NULL;
+    FILE* fp;
+    size_t len = 0;
+    ssize_t read;
+    char* title = "test_input.txt";
+    char dir[100];
+    sprintf(dir, "resources/%s", title);
+
+    // First pass - read data
+    fp = fopen(dir, "r");
+    if (fp == NULL)
+        return 1;
+    while ((read = getline(&line, &len, fp)) != -1) {
+        Map_Insert(M, title, line);
+    }
+    fclose(fp);
+
+    // Second pass - write to file and compare file content
+    int success = 0;
+    List_Write_Book(Map_Get(M, title), 0);
+    // Check if file exists
+    char book_name[] = "book_00.txt";
+    if (access(book_name, F_OK) != 0) {
+        success = 1;
+        printf("File is not created\n");
+    } else {
+        remove("book_00.txt");
+    }
+
+    if (success != 0) {
+        printf("Fail test_write_to_file\n");
+    }
+
+    after_each_map(M);
+    return success;
 }
 
 int main() {
@@ -292,11 +334,14 @@ int main() {
     run_tests += 1;
     failed_tests += test_multithreaded_insert_map();
 
-    // Test read from file: 
+    // Test read from file:
     run_tests += 1;
     failed_tests += test_read_from_file();
 
+    // Test write to file:
+    run_tests += 1;
+    failed_tests += test_write_to_file();
+
     printf("Passed tests: %d, Failed tests: %d\n", run_tests - failed_tests,
            failed_tests);
-        
 }

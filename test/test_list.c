@@ -78,7 +78,7 @@ int test_list_get_book(char* title) {
     char dir[100];
     sprintf(dir, "resources/%s", title);
 
-    // First pass - read data
+    // Second pass - compare results
     fp = fopen(dir, "r");
     if (fp == NULL)
         return 1;
