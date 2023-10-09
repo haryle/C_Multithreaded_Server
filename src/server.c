@@ -6,13 +6,12 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-
+#include "../utils/list.h"
 #ifndef PORT
     #define PORT 8080
 #endif
 #define LISTEN_BACKLOG 50
-#define MAX 80
-
+#define MAX 10
 #define handle_error(msg)   \
     do {                    \
         perror(msg);        \
@@ -20,7 +19,7 @@
     } while (0)
 
 int server_socket;
-
+list_t List;
 
 // Release the socket
 void shutdown_server() {
@@ -29,7 +28,7 @@ void shutdown_server() {
 }
 
 // Close server socket, free up resources
-void SIGINT_handler(int sig) {
+void handle_SIGINT(int sig) {
     shutdown_server();
     exit(0);
 }
@@ -39,7 +38,7 @@ void func(int connfd) {
     int read_len;
     // infinite loop for chat
     while (true) {
-        signal(SIGINT, SIGINT_handler);
+        signal(SIGINT, handle_SIGINT);
         bzero(buff, MAX);
         // read the message from client and copy it in buffer
         read_len = recv(connfd, buff, sizeof(buff), 0);
@@ -83,6 +82,13 @@ int main(void) {
     if (listen(server_socket, LISTEN_BACKLOG) == -1)
         handle_error("listen");
     printf("Server listening on port: %d\n", (int)PORT);
+
+    // Init list
+    Concurrent_List_Init(&List);
+
+    //=============================================================
+    //                  WHILE LOOP
+    //=============================================================
 
     // /* Now we can accept incoming connections one
     //           at a time using accept(2). */

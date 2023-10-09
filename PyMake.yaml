@@ -25,8 +25,9 @@ server:
       port: 8080
       src: src 
       out: out
+      utils: utils
   cmd:
-    - gcc -Wall $(src)/server.c -o $(out)/server.o -pthread -DPORT=$(port)
+    - gcc -Wall $(utils)/list.c $(utils)/map.c $(src)/server.c -o $(out)/server.o -pthread -DPORT=$(port)
     - ./$(out)/server.o
 
 program:
