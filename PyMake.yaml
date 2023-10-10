@@ -25,13 +25,14 @@ server:
   var:
     basic:
       port: 8080
+      pattern: happy
       src: src 
       out: out
       utils: utils
   cmd:
     - mkdir -p $(out)
-    - gcc -Wall $(utils)/string_vector.c $(utils)/list.c $(utils)/map.c $(src)/server.c -o $(out)/server.o -pthread -DPORT=$(port)
-    - ./$(out)/server.o
+    - gcc -Wall $(utils)/string_vector.c $(utils)/list.c $(utils)/map.c $(src)/server.c -o $(out)/server.o -pthread
+    - ./$(out)/server.o -l $(port) -p $(pattern)
 
 program:
   var:

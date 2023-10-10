@@ -9,9 +9,6 @@
 #include <unistd.h>
 #include "../utils/list.h"
 #include "../utils/string_vector.h"
-#ifndef PORT
-    #define PORT 8080
-#endif
 #define LISTEN_BACKLOG 50
 #define MAX 10
 #define VECTORSIZE 1024
@@ -21,6 +18,12 @@
         perror(msg);        \
         exit(EXIT_FAILURE); \
     } while (0)
+
+#define handle_parse_error()                                            \
+    {                                                                   \
+        printf("Usage: server -l <port_number> -p <search_pattern>\n"); \
+        exit(EXIT_FAILURE);                                             \
+    }
 
 int server_socket;  // Server socket file descriptor
 list_t List;        // Concurrent List Data Structure
@@ -125,7 +128,21 @@ void* connection_runnable(void* arg) {
     return NULL;
 }
 
-int main(void) {
+int main(int argc, char** argv) {
+    // Parse CLI
+    int port;
+    char* pattern;
+    if (argc != 5) {
+        handle_parse_error();
+    } else {
+        if (strcmp(argv[1], "-l") != 0)
+            handle_parse_error();
+        if (strcmp(argv[3], "-p") != 0)
+            handle_parse_error();
+        port = atoi(argv[2]);
+        pattern = argv[4];
+    }
+    // Initialise arguments
     int client_socket;
     struct sockaddr_in server_addr, client_addr;
     socklen_t addr_size;
@@ -142,7 +159,7 @@ int main(void) {
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_addr.sin_port = htons(PORT);
+    server_addr.sin_port = htons(port);
 
     // Bind address
     if (bind(server_socket, (struct sockaddr*)&server_addr,
@@ -152,7 +169,8 @@ int main(void) {
     // Listen on port
     if (listen(server_socket, LISTEN_BACKLOG) == -1)
         handle_error("listen");
-    printf("Server listening on port: %d\n", (int)PORT);
+    printf("Server listening on port: %d\n", port);
+    printf("Search pattern: %s\n", pattern);
 
     // Init list
     Concurrent_List_Init(&List);
