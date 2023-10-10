@@ -36,7 +36,7 @@ typedef struct ___thread_insert_map_arg_t {
 
 linked_list_t* BeforeEachList() {
     linked_list_t* LL = (linked_list_t*)malloc(sizeof(linked_list_t));
-    List_Init(LL);
+    List_Init(LL, "\n");
     return LL;
 }
 
@@ -148,7 +148,7 @@ int test_multithreaded_insert_list() {
 // Test cases for map
 map_t* before_each_map() {
     map_t* M = (map_t*)malloc(sizeof(map_t));
-    Map_Init(M);
+    Map_Init(M, "\n");
     return M;
 }
 
@@ -312,6 +312,16 @@ int test_write_to_file() {
     return success;
 }
 
+int test_count_occurrence(char* string, char* pattern, int count) {
+    int actual = count_occurence(string, pattern);
+    if (actual != count) {
+        printf("Fail test_count_occurence for input: %s, %s, %d, %d\n", string,
+               pattern, count, actual);
+        return 1;
+    }
+    return 0;
+}
+
 int main() {
     int failed_tests = 0;
     int run_tests = 0;
@@ -341,6 +351,28 @@ int main() {
     // Test write to file:
     run_tests += 1;
     failed_tests += test_write_to_file();
+
+    // Test count occurences:
+    run_tests += 1;
+    failed_tests +=
+        test_count_occurrence("hello 1 hello 2 hello 3", "hello", 3);
+
+    run_tests += 1;
+    failed_tests += test_count_occurrence(
+        "internal, external, international, rational, annal", "al", 5);
+
+    run_tests += 1;
+    failed_tests += test_count_occurrence(
+        "internal, external, international, rational, annal", "er", 3);
+
+    run_tests += 1;
+    failed_tests += test_count_occurrence(
+        "algebra, alabama, alquaeda, allegedly", "al", 4);
+    
+    run_tests += 1;
+    failed_tests += test_count_occurrence(
+        "algebra, alabama, alquaeda, allegedly", "a", 10);
+
 
     printf("Passed tests: %d, Failed tests: %d\n", run_tests - failed_tests,
            failed_tests);
