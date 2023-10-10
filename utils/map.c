@@ -8,41 +8,45 @@
 #include <string.h>
 #define SEED 0x12345678
 
-void List_Init(linked_list_t* LL, char* pattern) {
-    LL->size = 0;
-    LL->head = LL->tail = NULL;
+int Node_Init(char* content, char** pattern, node_t** dst) {
+    *dst = (node_t*)malloc(sizeof(node_t));
+    if (*dst == NULL) {
+        perror("malloc");
+        return 1;
+    }
+    (*dst)->content = (char*)malloc(sizeof(char) * (strlen(content) + 1));
+    if ((*dst)->content == NULL) {
+        perror("malloc");
+        return 1;
+    }
+    (*dst)->next = NULL;
+    (*dst)->book_next = NULL;
+    (*dst)->next_frequent_search = NULL;
+    (*dst)->pattern_count = 0;
+    strcpy((*dst)->content, content);
+    (*dst)->pattern_count = count_occurence((*dst)->content, *pattern);
+    return 0;
+}
+
+void Node_Free(node_t* N) {
+    free(N->content);
+}
+
+void List_Init(linked_list_t* LL, char** pattern, char** title) {
+    LL->pattern_head = NULL;
+    LL->pattern_tail = NULL;
+    LL->head = NULL;
+    LL->tail = NULL;
     pthread_mutex_init(&LL->lock, NULL);
+    LL->size = 0;
     LL->pattern = pattern;
+    LL->title = title;
     LL->pattern_count = 0;
 }
 
-int List_Insert(linked_list_t* LL, char* title, char* value) {
-    // Allocate memory for a new node
-    node_t* tmp = (node_t*)malloc(sizeof(node_t));
-    if (tmp == NULL) {
-        perror("malloc: failed to allocate memory for List_Insert\n");
-        return 1;
-    }
-    tmp->title = (char*)malloc(sizeof(char) * (strlen(title) + 1));
-    if (tmp->title == NULL) {
-        perror("malloc: failed to allocate node title\n");
-        return 1;
-    }
-    tmp->value = (char*)malloc(sizeof(char) * (strlen(value) + 1));
-    if (tmp->value == NULL) {
-        perror("malloc: failed to allcoate node content\n");
-        return 1;
-    }
-    // Copy the title and content to new node
-    tmp->book_next = NULL;
-    tmp->next = NULL;
-    tmp->next_frequent_search = NULL;
-    tmp->pattern_count = 0;
-    strcpy(tmp->title, title);
-    strcpy(tmp->value, value);
-    // Count pattern
-    tmp->pattern_count = count_occurence(tmp->value, LL->pattern);
-
+int List_Insert(linked_list_t* LL, char* content) {
+    node_t* tmp;
+    int status = Node_Init(content, LL->pattern, &tmp);
     // Add new node to list
     pthread_mutex_lock(&LL->lock);
     LL->size += 1;
@@ -56,27 +60,25 @@ int List_Insert(linked_list_t* LL, char* title, char* value) {
     }
     // Add currrent node to list of search patterns if contains pattern
     if (tmp->pattern_count != 0) {
-        LL->pattern_count += tmp->pattern_count;  // Increment total count
-        node_t* current = LL->pattern_head;
-        if (current == NULL) {
+        LL->pattern_count += tmp->pattern_count;
+        if (LL->pattern_head == NULL)
             LL->pattern_head = tmp;
-        } else {
-            while (current->next_frequent_search != NULL)
-                current = current->next_frequent_search;
-            if (current != tmp)
-                current->next_frequent_search = tmp;
+        if (LL->pattern_tail == NULL)
+            LL->pattern_tail = tmp;
+        else {
+            LL->pattern_tail->next_frequent_search = tmp;
+            LL->pattern_tail = tmp;
         }
     }
     pthread_mutex_unlock(&LL->lock);
     return 0;
 }
 
-bool List_Contains(linked_list_t* LL, char* title, char* value) {
+bool List_Contains(linked_list_t* LL, char* content) {
     pthread_mutex_lock(&LL->lock);
     node_t* current_node = LL->head;
     while (current_node != NULL) {
-        if ((strcmp(title, current_node->title) == 0) &&
-            (strcmp(value, current_node->value) == 0)) {
+        if ((strcmp(content, current_node->content) == 0)) {
             pthread_mutex_unlock(&LL->lock);
             return true;
         }
@@ -91,6 +93,7 @@ void List_Free(linked_list_t* LL) {
     node_t* current_node = LL->head;
     while (current_node != NULL) {
         node_t* new_node = current_node->book_next;
+        Node_Destroy(current_node);
         free(current_node);
         current_node = new_node;
     }
@@ -111,13 +114,42 @@ int hash(char* str) {
 }
 
 void Map_Init(map_t* M, char* pattern) {
+    pthread_mutex_init(&M->lock, NULL);
+    M->size = 0;
     for (int i = 0; i < CAPACITY; i++)
         List_Init(&M->lists[i], pattern);
 }
 
+bool Map_Contains(map_t* M, char* title) {
+    pthread_mutex_lock(&M->lock);
+    if (M->size == 0) {
+        pthread_mutex_unlock(&M->lock);
+        return false;
+    }
+    bool contains = false;
+    for (int i = 0; i < M->size; i++) {
+        if (strcmp(M->keys[i], title) == 0) {
+            contains = true;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&M->lock);
+    return contains;
+}
+
 int Map_Insert(map_t* M, char* title, char* value) {
+    if (Map_Contains(M, title) == false) {
+        if (M->size < CAPACITY) {
+            // Add new key to list
+            pthread_mutex_lock(&M->lock);
+            M->keys[M->size] = title;
+            M->size++;
+            pthread_mutex_unlock(&M->lock);
+        }
+    }
     int index = hash(title);
-    return List_Insert(&M->lists[index], title, value);
+    int status = List_Insert(&M->lists[index], title, value);
+    return status;
 }
 
 void Map_Free(map_t* M) {

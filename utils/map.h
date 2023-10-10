@@ -9,20 +9,25 @@
 Node data structure.
 
 Fields:
-    char* title - book title
-    char* value - book content
-    node_t* next - ptr to next node in the list 
-    node_t* book_next - ptr to the next item in the same book 
+    char* content;                // Line Content
+    int pattern_count;            // Number of pattern occurences
+    struct ___node_t* next;       // Link to the next element in the list
+    struct ___node_t* book_next;  // Link to the next item in the same book
+    struct ___node_t*
+        next_frequent_search;  // Link to the next item containing search pattern
 */
 typedef struct ___node_t {
-    char* title;
-    char* value;
+    char* content;                // Line Content
     int pattern_count;            // Number of pattern occurences
     struct ___node_t* next;       // Link to the next element in the list
     struct ___node_t* book_next;  // Link to the next item in the same book
     struct ___node_t*
         next_frequent_search;  // Link to the next item containing search pattern
 } node_t;
+
+int Node_Create(char* content, char** pattern, node_t** dst);
+
+void Node_Free(node_t* N)
 
 /*
 Internal data structure used in hash map 
@@ -31,17 +36,25 @@ linked_list contains nodes of the same book title, arranged in by the order or
 read. New node is added to the tail end of the list. 
 
 Fields: 
-    node_t * head - head node. Used for iterating from head 
-    node_t * tail - tail node. Used for adding new item
-    pthread_mutex_t lock - list lock 
-*/
-typedef struct ___linked_list_t {
     node_t* pattern_head;  // ptr to the head of the pattern search
+    node_t* pattern_tail;  // ptr to the tail of the pattern search
     node_t* head;          // ptr to the head of the list
     node_t* tail;          // ptr to the tail of the list
     pthread_mutex_t lock;  // list lock
     int size;              // list size
-    char* pattern;         // search pattern string
+    char** pattern;        // search pattern string
+    char** title;          // title
+    int pattern_count;     // pattern count
+*/
+typedef struct ___linked_list_t {
+    node_t* pattern_head;  // ptr to the head of the pattern search
+    node_t* pattern_tail;  // ptr to the tail of the pattern search
+    node_t* head;          // ptr to the head of the list
+    node_t* tail;          // ptr to the tail of the list
+    pthread_mutex_t lock;  // list lock
+    int size;              // list size
+    char** pattern;        // search pattern string
+    char** title;          // title
     int pattern_count;     // pattern count
 } linked_list_t;
 
@@ -58,7 +71,7 @@ node_t* List_Tail(linked_list_t* L);
 /*
 Initialise linked list 
 */
-void List_Init(linked_list_t* LL, char* pattern);
+void List_Init(linked_list_t* LL, char** pattern, char** title);
 
 /*
 Insert new node to the list
@@ -72,7 +85,7 @@ Returns:
 0 - if the operation was sucessful 
 1 - if the operation fails 
 */
-int List_Insert(linked_list_t* LL, char* title, char* value);
+int List_Insert(linked_list_t* LL, char* content);
 
 /*
 Check if list contains a title
@@ -86,7 +99,7 @@ Returns:
 true - if the list contains any node with the same title 
 false - otherwise 
 */
-bool List_Contains(linked_list_t* LL, char* title, char* value);
+bool List_Contains(linked_list_t* LL, char* content);
 
 /*
 Free up memory of the linked list 
@@ -120,8 +133,16 @@ Fields:
 lists[CAPACITY] - internal linked list 
 */
 typedef struct ___map_t {
+    pthread_mutex_t lock;
+    char* keys[CAPACITY];
+    int size;
     linked_list_t lists[CAPACITY];
 } map_t;
+
+/*
+Check if map contains title
+*/
+bool Map_Contains(map_t* M, char* title);
 
 /* Initialise the map */
 void Map_Init(map_t* M, char* pattern);
