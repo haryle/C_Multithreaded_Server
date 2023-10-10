@@ -36,6 +36,7 @@ Fields:
     pthread_mutex_t lock - list lock 
 */
 typedef struct ___linked_list_t {
+    node_t* pattern_head;  // ptr to the head of the pattern search
     node_t* head;          // ptr to the head of the list
     node_t* tail;          // ptr to the tail of the list
     pthread_mutex_t lock;  // list lock

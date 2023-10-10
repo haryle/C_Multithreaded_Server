@@ -57,11 +57,15 @@ int List_Insert(linked_list_t* LL, char* title, char* value) {
     // Add currrent node to list of search patterns if contains pattern
     if (tmp->pattern_count != 0) {
         LL->pattern_count += tmp->pattern_count;  // Increment total count
-        node_t* current = LL->head;
-        while (current->next_frequent_search != NULL)
-            current = current->next_frequent_search;
-        if (current != tmp)
-            current->next_frequent_search = tmp;
+        node_t* current = LL->pattern_head;
+        if (current == NULL) {
+            LL->pattern_head = tmp;
+        } else {
+            while (current->next_frequent_search != NULL)
+                current = current->next_frequent_search;
+            if (current != tmp)
+                current->next_frequent_search = tmp;
+        }
     }
     pthread_mutex_unlock(&LL->lock);
     return 0;

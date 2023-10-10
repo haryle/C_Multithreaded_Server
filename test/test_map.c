@@ -322,6 +322,144 @@ int test_count_occurrence(char* string, char* pattern, int count) {
     return 0;
 }
 
+int test_next_pattern_works_blank() {
+    map_t* M = before_each_map();
+    char* line = NULL;
+    FILE* fp;
+    size_t len = 0;
+    ssize_t read;
+    char* title = "test_input.txt";
+    char dir[100];
+    sprintf(dir, "resources/%s", title);
+
+    // First pass - read data
+    fp = fopen(dir, "r");
+    if (fp == NULL)
+        return 1;
+    while ((read = getline(&line, &len, fp)) != -1) {
+        Map_Insert(M, title, line);
+    }
+    fclose(fp);
+
+    // Second pass - compare line by line
+    linked_list_t* list = Map_Get(M, title);
+    node_t* current_file = list->head;
+    node_t* current_pattern = list->pattern_head;
+
+    int success = 0;
+    while (true) {
+        if (current_file != current_pattern) {
+            success = 1;
+            break;
+        }
+        if (current_file == NULL)
+            break;
+        if (current_file == NULL)
+            break;
+        current_file = current_file->book_next;
+        current_pattern = current_pattern->next_frequent_search;
+    }
+
+    if (success != 0)
+        printf("Fail test_next_pattern_works \n");
+    after_each_map(M);
+    return success;
+}
+
+int test_next_pattern_works_second() {
+    map_t* M = (map_t*)malloc(sizeof(map_t));
+    Map_Init(M, "second");
+    char* line = NULL;
+    FILE* fp;
+    size_t len = 0;
+    ssize_t read;
+    char* title = "test_input.txt";
+    char dir[100];
+    sprintf(dir, "resources/%s", title);
+
+    // First pass - read data
+    fp = fopen(dir, "r");
+    if (fp == NULL)
+        return 1;
+    while ((read = getline(&line, &len, fp)) != -1) {
+        Map_Insert(M, title, line);
+    }
+    fclose(fp);
+
+    // Manual test
+    int success = 0;
+    node_t* current = Map_Get(M, "test_input.txt")->pattern_head;
+
+    if (current == NULL) {
+        printf("First node is NULL\n");
+        success = 1;
+    } else {
+        if (strcmp(
+                current->value,
+                "This is the message body first line. This is the second line. "
+                "This is the third line.\n") != 0) {
+            printf(
+                "Actual: %s, Expected: %s", current->value,
+                "This is the message body first line. This is the second line. "
+                "This is the third line.\n");
+            success = 1;
+        }
+    }
+
+    current = current->next_frequent_search;
+    if (current == NULL) {
+        printf("Second node is NULL\n");
+        success = 1;
+    } else {
+        if (strcmp(current->value, "This is the second paragraph.\n") != 0) {
+            printf("Actual: %s, Expected: %s", current->value,
+                   "This is the second paragraph.\n");
+            success = 1;
+        }
+    }
+    if (current->next_frequent_search != NULL)
+        success = 1;
+    if (Map_Get(M, "test_input.txt")->pattern_count != 2)
+        success = 1;
+
+    if (success != 0)
+        printf("Fail test_next_pattern_works_second \n");
+
+    after_each_map(M);
+    return success;
+}
+
+int test_next_pattern_works_the() {
+    map_t* M = (map_t*)malloc(sizeof(map_t));
+    Map_Init(M, "the");
+    char* line = NULL;
+    FILE* fp;
+    size_t len = 0;
+    ssize_t read;
+    char* title = "test_input.txt";
+    char dir[100];
+    sprintf(dir, "resources/%s", title);
+
+    // First pass - read data
+    fp = fopen(dir, "r");
+    if (fp == NULL)
+        return 1;
+    while ((read = getline(&line, &len, fp)) != -1) {
+        Map_Insert(M, title, line);
+    }
+    fclose(fp);
+    int success = 0;
+
+    success = Map_Get(M, "test_input.txt")->pattern_count == 8 ? 0 : 1;
+
+    if (success != 0)
+        printf("Fail: test_next_pattern_works_the\n");
+
+    after_each_map(M);
+
+    return success;
+}
+
 int main() {
     int failed_tests = 0;
     int run_tests = 0;
@@ -366,13 +504,22 @@ int main() {
         "internal, external, international, rational, annal", "er", 3);
 
     run_tests += 1;
-    failed_tests += test_count_occurrence(
-        "algebra, alabama, alquaeda, allegedly", "al", 4);
-    
-    run_tests += 1;
-    failed_tests += test_count_occurrence(
-        "algebra, alabama, alquaeda, allegedly", "a", 10);
+    failed_tests +=
+        test_count_occurrence("algebra, alabama, alquaeda, allegedly", "al", 4);
 
+    run_tests += 1;
+    failed_tests +=
+        test_count_occurrence("algebra, alabama, alquaeda, allegedly", "a", 10);
+
+    // Test next pattern
+    run_tests += 1;
+    failed_tests = test_next_pattern_works_blank();
+
+    run_tests += 1;
+    failed_tests = test_next_pattern_works_second();
+
+    run_tests += 1;
+    failed_tests = test_next_pattern_works_the();
 
     printf("Passed tests: %d, Failed tests: %d\n", run_tests - failed_tests,
            failed_tests);
