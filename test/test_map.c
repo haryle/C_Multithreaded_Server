@@ -37,6 +37,7 @@ typedef struct ___thread_insert_map_arg_t {
 linked_list_t* BeforeEachList() {
     linked_list_t* LL = (linked_list_t*)malloc(sizeof(linked_list_t));
     List_Init(LL, "\n");
+    printf("Create List Successfully\n");
     return LL;
 }
 
@@ -44,9 +45,11 @@ linked_list_t* BeforeEachList() {
 void AfterEachList(linked_list_t* LL) {
     List_Free(LL);
     free(LL);
+    printf("Destroy List Successfully\n");
 }
 
 int test_insert(int start, int end) {
+    printf("Test: test_insert %d, %d\n", start, end);
     linked_list_t* LL = BeforeEachList();
     for (int i = start; i <= end; i++)
         List_Insert(LL, fixture[i].title, fixture[i].value);
@@ -83,6 +86,7 @@ int test_insert(int start, int end) {
 }
 
 int test_contain_empty_list_return_false() {
+    printf("Test: test_contain_empty_list_return_false\n");
     linked_list_t* L = BeforeEachList();
     int success = 0;
     if (List_Contains(L, "COMPSCI2203",
@@ -95,6 +99,7 @@ int test_contain_empty_list_return_false() {
 }
 
 int test_contain_non_empty_list_does_not_exist_return_false() {
+    printf("Test: test_contain_non_empty_list_does_not_exist_return_false\n");
     linked_list_t* L = BeforeEachList();
     List_Insert(L, fixture[0].title, fixture[0].value);
     int success = 0;
@@ -116,6 +121,7 @@ void* thread_insert_list(void* arg) {
 }
 
 int test_multithreaded_insert_list() {
+    printf("Test: test_multithreaded_insert_list\n");
     linked_list_t* L = BeforeEachList();
     pthread_t thr[FIXTURESIZE];
     thread_insert_list_arg_t args[FIXTURESIZE];
@@ -149,12 +155,14 @@ int test_multithreaded_insert_list() {
 map_t* before_each_map() {
     map_t* M = (map_t*)malloc(sizeof(map_t));
     Map_Init(M, "\n");
+    printf("Create Map Successfully\n");
     return M;
 }
 
 void after_each_map(map_t* M) {
     Map_Free(M);
     free(M);
+    printf("Destroy Map Successfully\n");
 }
 
 void* thread_insert_map(void* arg) {
@@ -165,6 +173,7 @@ void* thread_insert_map(void* arg) {
 }
 
 int test_multithreaded_insert_map() {
+    printf("Test: test_multithreaded_insert_map\n");
     map_t* M = before_each_map();
     pthread_t thr[FIXTURESIZE];
     thread_insert_map_arg_t args[FIXTURESIZE];
@@ -219,6 +228,7 @@ int test_multithreaded_insert_map() {
 // Test readline from file
 
 int test_read_from_file() {
+    printf("Test: test_read_from_file\n");
     map_t* M = before_each_map();
     char* line = NULL;
     FILE* fp;
@@ -274,6 +284,7 @@ int test_read_from_file() {
 }
 
 int test_write_to_file() {
+    printf("Test: test_write_to_file\n");
     map_t* M = before_each_map();
     char* line = NULL;
     FILE* fp;
@@ -313,6 +324,7 @@ int test_write_to_file() {
 }
 
 int test_count_occurrence(char* string, char* pattern, int count) {
+    printf("Test: test_count_occurences: %s, %s, %d\n", string, pattern, count);
     int actual = count_occurence(string, pattern);
     if (actual != count) {
         printf("Fail test_count_occurence for input: %s, %s, %d, %d\n", string,
@@ -323,6 +335,7 @@ int test_count_occurrence(char* string, char* pattern, int count) {
 }
 
 int test_next_pattern_works_blank() {
+    printf("Test: test_next_pattern_works_blank\n");
     map_t* M = before_each_map();
     char* line = NULL;
     FILE* fp;
@@ -367,6 +380,7 @@ int test_next_pattern_works_blank() {
 }
 
 int test_next_pattern_works_second() {
+    printf("Test: test_next_pattern_works_second\n");
     map_t* M = (map_t*)malloc(sizeof(map_t));
     Map_Init(M, "second");
     char* line = NULL;
@@ -430,6 +444,7 @@ int test_next_pattern_works_second() {
 }
 
 int test_next_pattern_works_the() {
+    printf("Test: test_next_pattern_works_the\n");
     map_t* M = (map_t*)malloc(sizeof(map_t));
     Map_Init(M, "the");
     char* line = NULL;

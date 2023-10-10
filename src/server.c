@@ -75,7 +75,7 @@ void process_buffer(string_vector_t* vector, char* buffer, int size,
             //Insert to concurrent list
             content = Vector_Flush(vector);
             // Display to stdout new node:
-            printf("New node - title: %s content: %s\n", *title, content);
+            printf("%s", content);
             if (*num_parsed_lines == 0)
                 *title = content;
             Concurrent_List_Insert(&List, *title, content);
