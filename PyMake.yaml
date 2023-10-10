@@ -5,6 +5,7 @@ test_map:
       out: out 
       test_src: test 
   cmd:
+    - mkdir -p $(out)
     - gcc -Wall $(test_src)/test_map.c $(src)/map.c -o $(out)/test_map.o -pthread
     - ./$(out)/test_map.o
 
@@ -16,6 +17,7 @@ test:
       out: out 
       test_src: test 
   cmd:
+    - mkdir -p $(out)
     - gcc -Wall $(src)/map.c $(src)/$(name).c $(test_src)/test_$(name).c -o $(out)/test_$(name).o -pthread
     - ./$(out)/test_$(name).o
 
@@ -27,6 +29,7 @@ server:
       out: out
       utils: utils
   cmd:
+    - mkdir -p $(out)
     - gcc -Wall $(utils)/string_vector.c $(utils)/list.c $(utils)/map.c $(src)/server.c -o $(out)/server.o -pthread -DPORT=$(port)
     - ./$(out)/server.o
 
@@ -38,5 +41,22 @@ program:
       src: src 
       out: out
   cmd:
+    - mkdir -p $(out)
     - gcc -Wall $(src)/$(name).c -o $(out)/$(name).o -pthread -DPORT=$(port)
     - ./$(out)/$(name).o
+
+send_file:
+  var:
+    basic:
+      name: null
+      delay: null
+      port: 8080
+  cmd:
+    - sleep $(delay) && nc -N 127.0.0.1 $(port) < resources/$(name)
+
+
+clean:
+  cmd:
+    - rm -rf out/*
+    - rm book_*.txt
+    - clear
