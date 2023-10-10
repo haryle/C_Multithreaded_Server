@@ -25,7 +25,7 @@ Initialise the list data structure
 Arguments:
 L - pointer to the list data structure to init value
 */
-void Concurrent_List_Init(list_t* L);
+void Concurrent_List_Init(list_t* L, char* pattern);
 
 /*
 Insert a new node to the list data structure 
@@ -59,7 +59,7 @@ value - string book content
 Returns:
 true if there is a node with those values
 */
-bool Concurrent_List_Contains_Inefficient(list_t*L, char* title, char* value);
+bool Concurrent_List_Contains_Inefficient(list_t* L, char* title, char* value);
 
 /*
 Efficient List contains search
@@ -72,8 +72,6 @@ value - string book content
 Returns:
 true if there is a node with those values
 */
-bool Concurrent_List_Contains(list_t*L, char* title, char* value);
+bool Concurrent_List_Contains(list_t* L, char* title, char* value);
 
-
-
-void Concurrent_List_Write_Book(list_t*L, char* title, int book_id);
+void Concurrent_List_Write_Book(list_t* L, char* title, int book_id);

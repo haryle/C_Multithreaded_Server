@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
     printf("Search pattern: %s\n", pattern);
 
     // Init list
-    Concurrent_List_Init(&List);
+    Concurrent_List_Init(&List, pattern);
 
     //=============================================================
     //                  WHILE LOOP

@@ -8,10 +8,12 @@
 #include <string.h>
 #define SEED 0x12345678
 
-void List_Init(linked_list_t* LL) {
+void List_Init(linked_list_t* LL, char* pattern) {
     LL->size = 0;
     LL->head = LL->tail = NULL;
     pthread_mutex_init(&LL->lock, NULL);
+    LL->pattern = pattern;
+    LL->pattern_count = 0;
 }
 
 int List_Insert(linked_list_t* LL, char* title, char* value) {
@@ -34,9 +36,13 @@ int List_Insert(linked_list_t* LL, char* title, char* value) {
     // Copy the title and content to new node
     tmp->book_next = NULL;
     tmp->next = NULL;
-
+    tmp->next_frequent_search = NULL;
+    tmp->pattern_count = 0;
     strcpy(tmp->title, title);
     strcpy(tmp->value, value);
+    // Count pattern
+    tmp->pattern_count = count_occurence(tmp->value, LL->pattern);
+
     // Add new node to list
     pthread_mutex_lock(&LL->lock);
     LL->size += 1;
@@ -47,6 +53,15 @@ int List_Insert(linked_list_t* LL, char* title, char* value) {
     else {
         LL->tail->book_next = tmp;
         LL->tail = tmp;
+    }
+    // Add currrent node to list of search patterns if contains pattern
+    if (tmp->pattern_count != 0) {
+        LL->pattern_count += tmp->pattern_count;  // Increment total count
+        node_t* current = LL->head;
+        while (current->next_frequent_search != NULL)
+            current = current->next_frequent_search;
+        if (current != tmp)
+            current->next_frequent_search = tmp;
     }
     pthread_mutex_unlock(&LL->lock);
     return 0;
@@ -91,9 +106,9 @@ int hash(char* str) {
     return h % CAPACITY;
 }
 
-void Map_Init(map_t* M) {
+void Map_Init(map_t* M, char* pattern) {
     for (int i = 0; i < CAPACITY; i++)
-        List_Init(&M->lists[i]);
+        List_Init(&M->lists[i], pattern);
 }
 
 int Map_Insert(map_t* M, char* title, char* value) {
@@ -144,4 +159,26 @@ void List_Write_Book(linked_list_t* L, int book_id) {
     }
     fclose(fp);
     pthread_mutex_unlock(&L->lock);
+}
+
+int count_occurence(char* string, char* pattern) {
+    int result = 0;
+    char* tmp = (char*)malloc(sizeof(char) * (strlen(string) + 1));
+    if (tmp == NULL) {
+        perror("malloc");
+        return -1;
+    }
+    char* substr = strstr(string, pattern);
+    while (substr != NULL) {
+        result++;
+        if (strlen(substr) == strlen(pattern))
+            break;
+        char* src = &substr[strlen(pattern) + 1];
+        int size = strlen(substr + strlen(pattern) + 1);
+        memmove(tmp, src, size + 1);
+
+        substr = strstr(tmp, pattern);
+    }
+    free(tmp);
+    return result;
 }

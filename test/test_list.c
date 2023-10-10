@@ -43,7 +43,7 @@ void* thread_insert(void* arg) {
 
 list_t* before_each() {
     list_t* list = (list_t*)malloc(sizeof(list_t));
-    Concurrent_List_Init(list);
+    Concurrent_List_Init(list, "\n");
     // Add data
     thread_arg_t args[FIXTURESIZE];
     pthread_t thr[FIXTURESIZE];

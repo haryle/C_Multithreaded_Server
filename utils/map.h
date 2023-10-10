@@ -17,8 +17,11 @@ Fields:
 typedef struct ___node_t {
     char* title;
     char* value;
+    int pattern_count;            // Number of pattern occurences
     struct ___node_t* next;       // Link to the next element in the list
     struct ___node_t* book_next;  // Link to the next item in the same book
+    struct ___node_t*
+        next_frequent_search;  // Link to the next item containing search pattern
 } node_t;
 
 /*
@@ -37,6 +40,8 @@ typedef struct ___linked_list_t {
     node_t* tail;          // ptr to the tail of the list
     pthread_mutex_t lock;  // list lock
     int size;              // list size
+    char* pattern;         // search pattern string
+    int pattern_count;     // pattern count
 } linked_list_t;
 
 /* 
@@ -52,7 +57,7 @@ node_t* List_Tail(linked_list_t* L);
 /*
 Initialise linked list 
 */
-void List_Init(linked_list_t* LL);
+void List_Init(linked_list_t* LL, char* pattern);
 
 /*
 Insert new node to the list
@@ -118,7 +123,7 @@ typedef struct ___map_t {
 } map_t;
 
 /* Initialise the map */
-void Map_Init(map_t* M);
+void Map_Init(map_t* M, char* pattern);
 
 /*
 Insert new node to the map
@@ -141,3 +146,5 @@ void Map_Free(map_t* M);
 Get LinkedList corresponding to title 
 */
 linked_list_t* Map_Get(map_t* M, char* title);
+
+int count_occurence(char* string, char* pattern);

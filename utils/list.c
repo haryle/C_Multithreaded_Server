@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-void Concurrent_List_Init(list_t* L) {
+void Concurrent_List_Init(list_t* L, char* pattern) {
     L->map = (map_t*)malloc(sizeof(map_t));
-    Map_Init(L->map);
+    Map_Init(L->map, pattern);
     L->head = L->tail = NULL;
     L->size = 0;
     pthread_mutex_init(&L->tail_lock, NULL);
