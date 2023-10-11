@@ -1,48 +1,23 @@
-test_map:
-  var:
-    basic:
-      src: utils
-      out: out 
-      test_src: test 
-  cmd:
-    - mkdir -p $(out)
-    - gcc -Wall $(test_src)/test_map.c $(src)/map.c -o $(out)/test_map.o -pthread
-    - ./$(out)/test_map.o
-
 test:
   var:
     basic:
-      name: null
-      src: utils
-      out: out 
-      test_src: test 
+      program: null 
+      deps: utils/node.c utils/linked_list.c utils/map.c utils/string_vector.c utils/list.c
   cmd:
-    - mkdir -p $(out)
-    - gcc -Wall $(src)/map.c $(src)/$(name).c $(test_src)/test_$(name).c -o $(out)/test_$(name).o -pthread
-    - ./$(out)/test_$(name).o
+    - gcc test/test_$(program).c $(deps) -Wall -pthread -o out/test_$(program).o
+    - ./out/test_$(program).o
 
-test_ll:
-  cmd:
-    - gcc test/test_linked_list.c utils/node.c utils/linked_list.c -o out/test_linked_list.out -Wall -pthread
-    - ./out/test_linked_list.out
-
-test_map:
-  cmd:
-    - gcc test/test_map.c utils/node.c utils/linked_list.c utils/map.c -o out/test_map.out -Wall -pthread
-    - ./out/test_map.out
 
 server:
   var:
     basic:
       port: 8080
       pattern: happy
-      src: src 
-      out: out
-      utils: utils
+      deps: utils/node.c utils/linked_list.c utils/map.c utils/string_vector.c utils/list.c
   cmd:
-    - mkdir -p $(out)
-    - gcc -Wall $(utils)/string_vector.c $(utils)/list.c $(utils)/map.c $(src)/server.c -o $(out)/server.o -pthread
-    - ./$(out)/server.o -l $(port) -p $(pattern)
+    - mkdir -p out
+    - gcc -Wall $(deps) src/server.c -o out/server.o -pthread
+    - ./out/server.o -l $(port) -p $(pattern)
 
 program:
   var:
