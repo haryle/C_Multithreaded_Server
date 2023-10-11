@@ -40,6 +40,20 @@ send_file:
   cmd:
     - sleep $(delay) && nc -N 127.0.0.1 $(port) < resources/$(name)
 
+integration_test:
+  cmd: |
+    #/usr/bin/bash
+    pymake run send_file first_book.txt 5 &
+    pymake run send_file second_book.txt 4 &
+    pymake run send_file third_book.txt 3 &
+    pymake run send_file fourth_book.txt 6 &
+    pymake run send_file fifth_book.txt 2 &
+    pymake run send_file sixth_book.txt 8 &
+    pymake run send_file seventh_book.txt 1 &
+    pymake run send_file eighth_book.txt 3 &
+    pymake run send_file ninth_book.txt 2 &
+    pymake run send_file tenth_book.txt 4 &
+
 
 clean:
   cmd:
