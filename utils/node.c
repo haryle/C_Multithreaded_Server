@@ -1,6 +1,7 @@
 #include "node.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int Node_Init(char* content, char** pattern, node_t** dst) {
     *dst = (node_t*)malloc(sizeof(node_t));
