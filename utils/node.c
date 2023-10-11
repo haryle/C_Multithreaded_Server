@@ -25,3 +25,25 @@ int Node_Init(char* content, char** pattern, node_t** dst) {
 void Node_Free(node_t* N) {
     free(N->content);
 }
+
+int count_occurence(char* string, char* pattern) {
+    int result = 0;
+    char* tmp = (char*)malloc(sizeof(char) * (strlen(string) + 1));
+    if (tmp == NULL) {
+        perror("malloc");
+        return -1;
+    }
+    char* substr = strstr(string, pattern);
+    while (substr != NULL) {
+        result++;
+        if (strlen(substr) == strlen(pattern))
+            break;
+        char* src = &substr[strlen(pattern) + 1];
+        int size = strlen(substr + strlen(pattern) + 1);
+        memmove(tmp, src, size + 1);
+
+        substr = strstr(tmp, pattern);
+    }
+    free(tmp);
+    return result;
+}
