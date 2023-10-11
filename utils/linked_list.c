@@ -77,24 +77,24 @@ void List_Free(linked_list_t* LL) {
     pthread_mutex_unlock(&LL->lock);
 }
 
-// void List_Write_Book(linked_list_t* L, int book_id) {
-//     pthread_mutex_lock(&L->lock);
-//     char file_name[SAVENAMEMAX];
-//     if (book_id < 10)
-//         sprintf(file_name, "book_0%d.txt", book_id);
-//     else
-//         sprintf(file_name, "book_%d.txt", book_id);
-//     FILE* fp = fopen(file_name, "wb");
-//     if (fp == NULL) {
-//         printf("Cannot open file_name: %s\n", file_name);
-//         pthread_mutex_unlock(&L->lock);
-//         return;
-//     }
-//     node_t* current = L->head;
-//     while (current != NULL) {
-//         fputs(current->content, fp);
-//         current = current->book_next;
-//     }
-//     fclose(fp);
-//     pthread_mutex_unlock(&L->lock);
-// }
+void List_Write_Book(linked_list_t* L, int book_id) {
+    pthread_mutex_lock(&L->lock);
+    char file_name[SAVENAMEMAX];
+    if (book_id < 10)
+        sprintf(file_name, "book_0%d.txt", book_id);
+    else
+        sprintf(file_name, "book_%d.txt", book_id);
+    FILE* fp = fopen(file_name, "wb");
+    if (fp == NULL) {
+        printf("Cannot open file_name: %s\n", file_name);
+        pthread_mutex_unlock(&L->lock);
+        return;
+    }
+    node_t* current = L->head;
+    while (current != NULL) {
+        fputs(current->content, fp);
+        current = current->book_next;
+    }
+    fclose(fp);
+    pthread_mutex_unlock(&L->lock);
+}

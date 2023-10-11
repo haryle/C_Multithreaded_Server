@@ -83,8 +83,13 @@ int hash(char* str) {
 
 void Map_Free(map_t* M) {
     for (int i = 0; i < M->size; i++) {
-        List_Free(Map_Get(M, M->keys[i]));
-        free(Map_Get(M, M->keys[i]));
-        free(M->keys[i]);
+        if (Map_Get(M, M->keys[i]) != NULL) {
+            List_Free(Map_Get(M, M->keys[i]));
+            free(Map_Get(M, M->keys[i]));
+        }
+        if (M->keys[i] != NULL) {
+            free(M->keys[i]);
+        }
     }
+    M->size = 0;
 }
