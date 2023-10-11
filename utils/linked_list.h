@@ -70,7 +70,7 @@ LL - pointer to the linked list
 content - string book content 
 
 Returns:
-0 - if the operation was sucessful 
+0 - if the operation was successful 
 1 - if the operation fails 
 */
 int List_Insert(linked_list_t* LL, char* content);

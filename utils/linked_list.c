@@ -1,6 +1,7 @@
 #include "linked_list.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void List_Init(linked_list_t* LL, char** pattern, char** title) {
     LL->pattern_head = NULL;
@@ -10,6 +11,7 @@ void List_Init(linked_list_t* LL, char** pattern, char** title) {
     pthread_mutex_init(&LL->lock, NULL);
     LL->size = 0;
     LL->pattern_count = 0;
+
     LL->pattern = pattern;
     LL->title = title;
 }
@@ -75,24 +77,24 @@ void List_Free(linked_list_t* LL) {
     pthread_mutex_unlock(&LL->lock);
 }
 
-void List_Write_Book(linked_list_t* L, int book_id) {
-    pthread_mutex_lock(&L->lock);
-    char file_name[SAVENAMEMAX];
-    if (book_id < 10)
-        sprintf(file_name, "book_0%d.txt", book_id);
-    else
-        sprintf(file_name, "book_%d.txt", book_id);
-    FILE* fp = fopen(file_name, "wb");
-    if (fp == NULL) {
-        printf("Cannot open file_name: %s\n", file_name);
-        pthread_mutex_unlock(&L->lock);
-        return;
-    }
-    node_t* current = L->head;
-    while (current != NULL) {
-        fputs(current->content, fp);
-        current = current->book_next;
-    }
-    fclose(fp);
-    pthread_mutex_unlock(&L->lock);
-}
+// void List_Write_Book(linked_list_t* L, int book_id) {
+//     pthread_mutex_lock(&L->lock);
+//     char file_name[SAVENAMEMAX];
+//     if (book_id < 10)
+//         sprintf(file_name, "book_0%d.txt", book_id);
+//     else
+//         sprintf(file_name, "book_%d.txt", book_id);
+//     FILE* fp = fopen(file_name, "wb");
+//     if (fp == NULL) {
+//         printf("Cannot open file_name: %s\n", file_name);
+//         pthread_mutex_unlock(&L->lock);
+//         return;
+//     }
+//     node_t* current = L->head;
+//     while (current != NULL) {
+//         fputs(current->content, fp);
+//         current = current->book_next;
+//     }
+//     fclose(fp);
+//     pthread_mutex_unlock(&L->lock);
+// }
