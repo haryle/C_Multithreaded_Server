@@ -16,7 +16,7 @@ void Map_Init(map_t* M, char** pattern) {
 
 linked_list_t* Map_Get(map_t* M, char* title) {
     if (Map_Contains(M, title))
-        return &M->lists[hash(title)];
+        return M->lists[hash(title)];
     return NULL;
 }
 
@@ -42,15 +42,25 @@ int Map_Insert(map_t* M, char* title, char* content) {
         if (M->size < CAPACITY) {
             // Add new key to list
             pthread_mutex_lock(&M->lock);
+
             // Allocate new list:
-            linked_list_t* L = Map_Get(M, title);
-            L = (linked_list_t*)malloc(sizeof(linked_list_t));
-            if (L == NULL) {
+            M->lists[hash(title)] =
+                (linked_list_t*)malloc(sizeof(linked_list_t));
+            if (M->lists[hash(title)] == NULL) {
                 pthread_mutex_unlock(&M->lock);
                 return -1;
             }
             // Add title to keys
-            M->keys[M->size] = title;
+            M->keys[M->size] =
+                (char*)malloc(sizeof(char) * (strlen(title) + 1));
+            if (M->keys[M->size] == NULL) {
+                pthread_mutex_unlock(&M->lock);
+                free(M->lists[hash(title)]);
+                return -1;
+            }
+            strcpy(M->keys[M->size], title);
+            // Initialise list
+            List_Init(M->lists[hash(title)], M->pattern, &M->keys[M->size]);
             M->size++;
             pthread_mutex_unlock(&M->lock);
         }
@@ -72,6 +82,9 @@ int hash(char* str) {
 }
 
 void Map_Free(map_t* M) {
-    for (int i = 0; i < M->size; i++)
+    for (int i = 0; i < M->size; i++) {
         List_Free(Map_Get(M, M->keys[i]));
+        free(Map_Get(M, M->keys[i]));
+        free(M->keys[i]);
+    }
 }

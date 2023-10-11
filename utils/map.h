@@ -1,4 +1,4 @@
-#include <linked_list.h>
+#include "linked_list.h"
 #include <pthread.h>
 #include <stdbool.h>
 #ifndef CAPACITY
