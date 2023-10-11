@@ -10,6 +10,7 @@ Arguments:
     map_t* map;                 // Map
     pthread_mutex_t tail_lock;  // Lock
     int size;                   // Size
+    char* pattern;              // Pattern
 */
 typedef struct __list_t {
     node_t* head;               // Head
