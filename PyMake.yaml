@@ -21,6 +21,16 @@ test:
     - gcc -Wall $(src)/map.c $(src)/$(name).c $(test_src)/test_$(name).c -o $(out)/test_$(name).o -pthread
     - ./$(out)/test_$(name).o
 
+test_ll:
+  cmd:
+    - gcc test/test_linked_list.c utils/node.c utils/linked_list.c -o out/test_linked_list.out -Wall -pthread
+    - ./out/test_linked_list.out
+
+test_map:
+  cmd:
+    - gcc test/test_map.c utils/node.c utils/linked_list.c utils/map.c -o out/test_map.out -Wall -pthread
+    - ./out/test_map.out
+
 server:
   var:
     basic:
@@ -59,5 +69,4 @@ send_file:
 clean:
   cmd:
     - rm -rf out/*
-    - rm book_*.txt
     - clear

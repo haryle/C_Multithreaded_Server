@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+// TODO: UPDATE INSERT, INIT, FREE
+
 void Concurrent_List_Init(list_t* L, char* pattern) {
     L->map = (map_t*)malloc(sizeof(map_t));
     Map_Init(L->map, pattern);
@@ -11,8 +13,8 @@ void Concurrent_List_Init(list_t* L, char* pattern) {
     pthread_mutex_init(&L->tail_lock, NULL);
 }
 
-int Concurrent_List_Insert(list_t* L, char* title, char* value) {
-    int status = Map_Insert(L->map, title, value);
+int Concurrent_List_Insert(list_t* L, char* title, char* content) {
+    int status = Map_Insert(L->map, title, content);
     if (status == 1)
         return status;
     linked_list_t* list = Map_Get(L->map, title);
@@ -42,12 +44,12 @@ linked_list_t* Concurrent_List_Get_Book(list_t* L, char* title) {
     return Map_Get(L->map, title);
 }
 
-bool Concurrent_List_Contains_Inefficient(list_t* L, char* title, char* value) {
+bool Concurrent_List_Contains_Inefficient(list_t* L, char* title,
+                                          char* content) {
     pthread_mutex_lock(&L->tail_lock);
     node_t* current = L->head;
     while (current != NULL) {
-        if ((strcmp(current->title, title) == 0) &&
-            (strcmp(current->value, value) == 0)) {
+        if ((strcmp(current->content, content) == 0)) {
             pthread_mutex_unlock(&L->tail_lock);
             return true;
         }
@@ -57,9 +59,9 @@ bool Concurrent_List_Contains_Inefficient(list_t* L, char* title, char* value) {
     return false;
 }
 
-bool Concurrent_List_Contains(list_t* L, char* title, char* value) {
+bool Concurrent_List_Contains(list_t* L, char* title, char* content) {
     linked_list_t* list = Map_Get(L->map, title);
-    return List_Contains(list, title, value);
+    return List_Contains(list, content);
 }
 
 void Concurrent_List_Write_Book(list_t* L, char* title, int book_id) {

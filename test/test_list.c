@@ -93,8 +93,8 @@ int test_list_get_book(char* title) {
             success = 1;
             break;
         }
-        if (strcmp(current->value, line) != 0) {
-            printf("Different: %s, %s\n", current->value, line);
+        if (strcmp(current->content, line) != 0) {
+            printf("Different: %s, %s\n", current->content, line);
             success = 1;
             break;
         }

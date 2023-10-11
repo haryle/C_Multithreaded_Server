@@ -1,6 +1,6 @@
-#include "linked_list.h"
 #include <pthread.h>
 #include <stdbool.h>
+#include "linked_list.h"
 #ifndef CAPACITY
     #define CAPACITY 500000
 #endif
@@ -8,8 +8,12 @@
 /*
 Thread-safe hashmap data structure 
 
-Fields: 
-lists[CAPACITY] - internal linked list 
+Fields:
+    char** pattern;                  // Search pattern
+    int size;                        // Map size
+    pthread_mutex_t lock;            // Lock
+    char* keys[CAPACITY];            // Inserted keys
+    linked_list_t* lists[CAPACITY];  // List pointers
 */
 typedef struct ___map_t {
     char** pattern;                  // Search pattern
@@ -36,7 +40,6 @@ Pointer to linked list or NULL if map does not
 contain title 
 */
 linked_list_t* Map_Get(map_t* M, char* title);
-
 
 /*
 Create a hash of the input string 
@@ -67,4 +70,3 @@ int Map_Insert(map_t* M, char* title, char* value);
 
 /* Free map memory */
 void Map_Free(map_t* M);
-
