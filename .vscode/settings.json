@@ -4,6 +4,7 @@
         "map.h": "c",
         "list.h": "c",
         "stdlib.h": "c",
-        "system_error": "c"
+        "system_error": "c",
+        "stdbool.h": "c"
     }
 }
