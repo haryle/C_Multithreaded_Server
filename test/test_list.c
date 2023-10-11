@@ -85,7 +85,7 @@ int test_list_get_book(char* title) {
 
     linked_list_t* list = Concurrent_List_Get_Book(L, title);
 
-    node_t* current = List_Head(list);
+    node_t* current = list->head;
 
     while ((read = getline(&line, &len, fp)) != -1) {
         if (current == NULL) {

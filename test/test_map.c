@@ -30,12 +30,10 @@ char* contents[4] = {
     "with only a loose network of volunteer support.\n",
 };
 
-char* titles[FIXTURESIZE] = {
-    "compsci_4416.txt", "compsci_4417.txt", "compsci_4807.txt",
-    "compsci_4811.txt", "compsci_4812.txt", "compsci_7007.txt",
-    "compsci_7039.txt", "compsci_7059.txt", "compsci_7064.txt",
-    "compsci_7092.txt",
-};
+char* titles[11] = {"compsci_4416.txt", "compsci_4417.txt", "compsci_4807.txt",
+                    "compsci_4811.txt", "compsci_4812.txt", "compsci_7007.txt",
+                    "compsci_7039.txt", "compsci_7059.txt", "compsci_7064.txt",
+                    "compsci_7092.txt", "compsci_7076.txt"};
 
 void before_each(const char* test_name, char** pattern) {
     test_status = 0;
@@ -136,7 +134,7 @@ void test_content_from_book_written_to_nodes(int id) {
     free_book_content(content, size);
 }
 
-void test_content_from_books_paralle() {
+void test_content_from_books_parallel() {
     pthread_t thr[FIXTURESIZE];
     char* book_contents[FIXTURESIZE][BOOKSIZE];
     int sizes[FIXTURESIZE];
@@ -173,6 +171,7 @@ void test_content_from_books_paralle() {
     }
 
     after_each(__func__);
+
     for (int i = 0; i < FIXTURESIZE; i++)
         free_book_content(book_contents[i], sizes[i]);
 }
@@ -181,6 +180,9 @@ int main() {
     for (int id = 0; id < FIXTURESIZE; id++) {
         test_content_from_book_written_to_nodes(id);
     }
-    test_content_from_books_paralle();
+    // Ensure nothing wrong happens with multi-threading
+    for (int i = 0; i < 1000; i++) {
+        test_content_from_books_parallel();
+    }
     printf("Pass: %d, Fail: %d\n", total - incorrect, incorrect);
 }
