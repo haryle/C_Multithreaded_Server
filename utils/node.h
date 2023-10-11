@@ -48,3 +48,15 @@ Args:
     N: node pointer to free 
 */
 void Node_Free(node_t* N);
+
+/* 
+Count the number of occurence of pattern in string 
+
+Args:
+    string: base string 
+    pattern: search pattern 
+
+Returns:
+    number of occurences
+*/
+int count_occurence(char* string, char* pattern);
