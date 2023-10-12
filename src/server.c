@@ -48,7 +48,7 @@ void Init_Server(server_t* server, char* pattern, int port) {
         handle_error("bind");
 
     // Listen on port
-    if (listen(server->server_socket, 5) == -1)
+    if (listen(server->server_socket, MAXTHREADCOUNT) == -1)
         handle_error("listen");
     printf("Server listening on port: %d\n", port);
     printf("Search pattern: %s\n", pattern);
@@ -129,28 +129,13 @@ void* connection_runnable(void* arg) {
     string_vector_t* vector = (string_vector_t*)malloc(sizeof(string_vector_t));
     Vector_Init(vector, VECTORSIZE);
 
-    // Testing
-    FILE* file;
-
-    // Open a file in write mode. If the file does not exist, it will be created.
-    // If the file already exists, its contents will be truncated.
-    char title[100];
-    sprintf(title, "output_%d.txt", params->client_socket);
-    file = fopen(title, "w");
-
-    if (file == NULL) {
-        fprintf(stderr, "Error opening file.\n");
-        exit(EXIT_FAILURE);
-    }
-
     // Recv data loop
     while (true) {
         // Clear buffer
         bzero(buff, MAX);
 
         // read the message from client and copy it in buffer
-        read_len = recv(params->client_socket, buff, sizeof(buff), 0);
-        fwrite(buff, sizeof(char), read_len - 1, file);
+        read_len = recv(*params->client_socket, buff, sizeof(buff), 0);
         process_buffer(vector, buff, read_len, &num_parsed_lines,
                        params->server->L);
         if (read_len == 0) {
@@ -165,15 +150,13 @@ void* connection_runnable(void* arg) {
             break;
         }
     }
-    // Write to test file
-    fclose(file);
-
     // Write to file
     int thread_id = Get_Sequence_Id_Server(params->server);
     printf("Writing book_%d.txt\n", thread_id);
     Concurrent_List_Write_Book(params->server->L, vector->title, thread_id);
     // Collect Garbage
-    close(params->client_socket);
+    close(*params->client_socket);
+    // free(params->client_socket);
     Vector_Free(vector);
     free(vector);
     return NULL;
@@ -183,23 +166,20 @@ void Run_Server(server_t* server) {
     int client_socket;
     socklen_t addr_size;
     struct sockaddr_in client_addr;
-    addr_size = sizeof(client_addr);
-    pthread_t thr[MAXTHREADCOUNT];
-    int id = 0;
+
+    pthread_t thr;
 
     while (true) {
+        addr_size = sizeof(client_addr);
         client_socket = accept(server->server_socket,
                                (struct sockaddr*)&client_addr, &addr_size);
         if (client_socket == -1)
             handle_error("accept");
-        runnable_params_t params = (runnable_params_t){server, client_socket};
-        if (id >= MAXTHREADCOUNT) {
-            for (int i = 0; i < MAXTHREADCOUNT; i++)
-                pthread_join(thr[id], NULL);
-            id = 0;
-        }
-        pthread_create(&thr[id], NULL, connection_runnable, (void*)&params);
-        id++;
+        int* new_socket = (int*)malloc(sizeof(int));
+        *new_socket = client_socket;
+        runnable_params_t params = (runnable_params_t){server, new_socket};
+
+        pthread_create(&thr, NULL, connection_runnable, (void*)&params);
         if (server->status == 1)
             break;
     }

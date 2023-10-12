@@ -7,6 +7,11 @@ test:
     - gcc test/test_$(program).c $(deps) -Wall -pthread -o out/test_$(program).o
     - ./out/test_$(program).o
 
+multi_server:
+  cmd:
+    - gcc src/multi_server.c -o out/multi_server.o -pthread
+    - ./out/multi_server.o
+
 
 server:
   var:
@@ -47,7 +52,7 @@ integration_test:
       pymake run send_file first_book.txt 1 &
       pymake run send_file second_book.txt 1 &
       pymake run send_file third_book.txt 1 &
-      pymake run send_file fourth_book.txt 11&
+      pymake run send_file fourth_book.txt 1 &
       pymake run send_file fifth_book.txt 1 &
       pymake run send_file sixth_book.txt 1 &
       pymake run send_file seventh_book.txt 1 &
@@ -60,3 +65,5 @@ clean:
     - rm -rf out/*
     - clear
     - rm -rf book_*.txt
+    - rm -rf output_*.txt
+    - rm -rf client_*.txt

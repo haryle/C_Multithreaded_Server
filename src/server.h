@@ -35,7 +35,7 @@ typedef struct ___server_t {
 
 typedef struct ___runnable_params_t {
     server_t* server;
-    int client_socket;
+    int* client_socket;
 } runnable_params_t;
 
 void Init_Server(server_t* server, char* pattern, int port);
