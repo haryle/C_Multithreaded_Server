@@ -3,16 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-// TODO: UPDATE INSERT, INIT, FREE
-
 void Concurrent_List_Init(list_t* L, char* pattern) {
     L->head = L->tail = NULL;
     pthread_mutex_init(&L->tail_lock, NULL);
+    pthread_mutex_init(&L->write_lock, NULL);
     L->size = 0;
     L->pattern = (char*)malloc(sizeof(char) * (strlen(pattern) + 1));
     strcpy(L->pattern, pattern);
     L->map = (map_t*)malloc(sizeof(map_t));
     Map_Init(L->map, &L->pattern);
+    L->best_count = 0;
+    L->best_title = NULL;
 }
 
 int Concurrent_List_Insert(list_t* L, char* title, char* content) {
@@ -76,4 +77,20 @@ void Concurrent_List_Write_Book(list_t* L, char* title, int book_id) {
     if (list == NULL)
         return;
     List_Write_Book(list, book_id);
+}
+
+void Concurrent_List_Calculate(list_t* L, int* done, pthread_cond_t* cond_var);
+
+void Concurrent_List_Poll(list_t* L, int* already_printed, int* done,
+                          pthread_cond_t* cond_var) {
+
+    pthread_mutex_lock(&L->write_lock);
+    while (done == 0)
+        // Wait for update
+        pthread_cond_wait(cond_var, &L->write_lock);
+    if (*already_printed == 0) {
+        //Display to screen results:
+    }
+    // Release lock
+    pthread_mutex_unlock(&L->write_lock);
 }
