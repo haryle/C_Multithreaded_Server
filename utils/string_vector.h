@@ -4,6 +4,8 @@ typedef struct ____string_vector_t {
     char* message;    // Message pointer
     size_t size;      // Current message size
     size_t max_size;  // Maximum allocated
+    char* title;
+    int line_parsed; 
 } string_vector_t;
 
 void Vector_Init(string_vector_t* V, int size);

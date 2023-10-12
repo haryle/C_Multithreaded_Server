@@ -1,8 +1,10 @@
 #include "string_vector.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 void Vector_Init(string_vector_t* V, int size) {
+    V->title = NULL;
+    V->line_parsed = 0;
     char* message = (char*)malloc((size + 1) * sizeof(char));
     if (message == NULL) {
         perror("malloc");
@@ -45,6 +47,9 @@ char* Vector_Flush(string_vector_t* V) {
     memmove(tmp, V->message, V->size + 1);
     V->message[0] = '\0';
     V->size = 0;
+    if (V->line_parsed == 0)
+        V->title = tmp;
+    V->line_parsed++;
     return tmp;
 }
 

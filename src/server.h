@@ -10,7 +10,7 @@
 #include "../utils/list.h"
 #include "../utils/string_vector.h"
 #define LISTEN_BACKLOG 50
-#define MAX 1024
+#define MAX 100
 #define VECTORSIZE 1024
 #define MAXTHREADCOUNT 50
 #define handle_error(msg)   \

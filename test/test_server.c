@@ -25,7 +25,7 @@ int incorrect = 0;
 
 int test_status = 0;
 
-int port = 8080;
+int port = 1236;
 
 char* titles[FIXTURESIZE] = {
     "first_book.txt", "second_book.txt", "third_book.txt",   "fourth_book.txt",
@@ -104,8 +104,40 @@ void test_single_file_upload(int i) {
     after_each(__func__);
 }
 
+void test_sequential_file_upload() {
+    before_each(__func__, "S");
+    for (int i = 0; i < FIXTURESIZE; i++)
+        upload_file(titles[i]);
+    compare();
+    after_each(__func__);
+}
+
+void* parallel_thread_upload(void* arg) {
+    upload_file((char*)arg);
+    return NULL;
+}
+
+void test_parallel_file_upload() {
+    before_each(__func__, "S");
+    pthread_t thr[FIXTURESIZE];
+    for (int i = 0; i < FIXTURESIZE; i++) {
+        pthread_create(&thr[i], NULL, parallel_thread_upload, (void*)titles[i]);
+    }
+
+    // pthread_join(thr[0], NULL);
+    // for (int i = 0; i < FIXTURESIZE; i++) {
+    //     pthread_join(thr[i], NULL);
+    // }
+    sleep(3);
+
+    // compare();
+    after_each(__func__);
+}
+
 int main() {
     for (int i = 0; i < FIXTURESIZE; i++)
         test_single_file_upload(i);
+    test_sequential_file_upload();
+    // test_parallel_file_upload();
     printf("Pass: %d, Fail: %d\n", total - incorrect, incorrect);
 }
