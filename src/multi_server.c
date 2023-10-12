@@ -6,8 +6,9 @@
 int seq_num = 0;
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
-void* handle_client(void* client_socket) {
-    int socket_fd = *((int*)client_socket);
+void* handle_client(void* arg) {
+    runnable_params_t* argv = (runnable_params_t*)arg;
+    int socket_fd = *(argv->client_socket);
     char buffer[1024];
     int bytes_received;
 
@@ -15,22 +16,24 @@ void* handle_client(void* client_socket) {
     char filename[20];
 
     // Get seq num
+    int file_id;
     pthread_mutex_lock(&lock);
-    int file_name = seq_num;
+    file_id = seq_num;
     seq_num++;
     pthread_mutex_unlock(&lock);
-
+    printf("File_id: %d\n", file_id);
     //Make file name
-    if (file_name < 10)
-        snprintf(filename, sizeof(filename), "book_0%d.txt", seq_num);
+    if (file_id < 10)
+        snprintf(filename, sizeof(filename), "book_0%d.txt", file_id);
     else
-        snprintf(filename, sizeof(filename), "book_%d.txt", seq_num);
-
+        snprintf(filename, sizeof(filename), "book_%d.txt", file_id);
+    printf("File name: %s\n", filename);
     FILE* file = fopen(filename, "w");
     if (file == NULL) {
         perror("Error opening file");
         close(socket_fd);
-        free(client_socket);
+        free(argv->client_socket);
+        free(argv);
         pthread_exit(NULL);
     }
 
@@ -41,7 +44,8 @@ void* handle_client(void* client_socket) {
 
     fclose(file);
     close(socket_fd);
-    free(client_socket);
+    free(argv->client_socket);
+    free(argv);
     pthread_exit(NULL);
 }
 
@@ -75,12 +79,17 @@ int main(int argc, char* argv[]) {
         }
 
         // Create a new thread to handle the client
-        int* new_socket = malloc(1);
+        int* new_socket = malloc(sizeof(int));
         *new_socket = client_socket;
-        if (pthread_create(&thread_id, NULL, handle_client, (void*)new_socket) <
+        runnable_params_t* params =
+            (runnable_params_t*)malloc(sizeof(runnable_params_t));
+        params->server = server;
+        params->client_socket = new_socket;
+        if (pthread_create(&thread_id, NULL, handle_client, (void*)params) <
             0) {
             perror("Thread creation failed");
             free(new_socket);
+            free(params);
             continue;
         }
 

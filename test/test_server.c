@@ -91,7 +91,7 @@ void upload_file(char* filename) {
 }
 
 void compare() {
-    char* arg[] = {"python3", "compare.py", NULL};
+    char* arg[] = {"pymake", "run", "compare", NULL};
     exec_cmd(arg);
 }
 
