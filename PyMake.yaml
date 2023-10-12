@@ -7,10 +7,10 @@ test:
     - gcc test/test_$(program).c $(deps) -Wall -pthread -o out/test_$(program).o
     - ./out/test_$(program).o
 
-multi_server:
+
+compare:
   cmd:
-    - gcc src/multi_server.c -o out/multi_server.o -pthread
-    - ./out/multi_server.o
+    python3 compare.py
 
 
 server:
@@ -47,6 +47,7 @@ send_file:
 
 integration_test:
   cmd: 
+    - pymake run clean 
     - |
       #/usr/bin/bash
       pymake run send_file first_book.txt 1 &
@@ -59,6 +60,7 @@ integration_test:
       pymake run send_file eighth_book.txt 1 &
       pymake run send_file ninth_book.txt 1 &
       pymake run send_file tenth_book.txt 1 &
+    - sleep 3 && pymake run compare 
 
 clean:
   cmd:

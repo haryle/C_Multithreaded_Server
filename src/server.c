@@ -117,12 +117,7 @@ void process_buffer(string_vector_t* vector, char* buffer, int size,
     Vector_Append(vector, temp);
 }
 
-/*
-Connection runnable task to be handled by each thread
-*/
-void* connection_runnable(void* arg) {
-    runnable_params_t* params = (runnable_params_t*)arg;
-    int client_socket = *(params->client_socket);
+void handle_io(int client_socket, list_t* L, server_t* server) {
     char buff[MAX];
     int read_len = 0;
     int num_parsed_lines = 0;
@@ -136,14 +131,12 @@ void* connection_runnable(void* arg) {
 
         // read the message from client and copy it in buffer
         read_len = recv(client_socket, buff, sizeof(buff), 0);
-        process_buffer(vector, buff, read_len, &num_parsed_lines,
-                       params->server->L);
+        process_buffer(vector, buff, read_len, &num_parsed_lines, L);
         if (read_len == 0) {
             //Flush remaining buffer to file:
             if (vector->size != 0) {
                 char* content = Vector_Flush(vector);
-                Concurrent_List_Insert(params->server->L, vector->title,
-                                       content);
+                Concurrent_List_Insert(L, vector->title, content);
                 if (vector->title != content)
                     free(content);
             }
@@ -151,14 +144,23 @@ void* connection_runnable(void* arg) {
         }
     }
     // Write to file
-    int thread_id = Get_Sequence_Id_Server(params->server);
+    int thread_id = Get_Sequence_Id_Server(server);
     printf("Writing book_%d.txt\n", thread_id);
-    Concurrent_List_Write_Book(params->server->L, vector->title, thread_id);
+    Concurrent_List_Write_Book(L, vector->title, thread_id);
     // Collect Garbage
     close(client_socket);
-    free(params->client_socket);
     Vector_Free(vector);
     free(vector);
+}
+
+/*
+Connection runnable task to be handled by each thread
+*/
+void* connection_runnable(void* arg) {
+    runnable_params_t* params = (runnable_params_t*)arg;
+    handle_io(*(params->client_socket), params->server->L, params->server);
+    free(params->client_socket);
+    free(params);
     return NULL;
 }
 
@@ -177,9 +179,12 @@ void Run_Server(server_t* server) {
             handle_error("accept");
         int* new_socket = (int*)malloc(sizeof(int));
         *new_socket = client_socket;
-        runnable_params_t params = (runnable_params_t){server, new_socket};
+        runnable_params_t* params =
+            (runnable_params_t*)malloc(sizeof(runnable_params_t));
+        params->server = server;
+        params->client_socket = new_socket;
 
-        pthread_create(&thr, NULL, connection_runnable, (void*)&params);
+        pthread_create(&thr, NULL, connection_runnable, (void*)params);
         if (server->status == 1)
             break;
     }
