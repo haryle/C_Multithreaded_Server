@@ -2,7 +2,7 @@ test:
   var:
     basic:
       program: null 
-      deps: utils/node.c utils/linked_list.c utils/map.c utils/string_vector.c utils/list.c
+      deps: utils/node.c utils/linked_list.c utils/map.c utils/string_vector.c utils/list.c src/server.c
   cmd:
     - gcc test/test_$(program).c $(deps) -Wall -pthread -o out/test_$(program).o
     - ./out/test_$(program).o
@@ -13,10 +13,10 @@ server:
     basic:
       port: 8080
       pattern: happy
-      deps: utils/node.c utils/linked_list.c utils/map.c utils/string_vector.c utils/list.c
+      deps: utils/node.c utils/linked_list.c utils/map.c utils/string_vector.c utils/list.c src/server.c
   cmd:
     - mkdir -p out
-    - gcc -Wall $(deps) src/server.c -o out/server.o -pthread
+    - gcc -Wall $(deps) src/server_driver.c -o out/server.o -pthread
     - ./out/server.o -l $(port) -p $(pattern)
 
 program:
@@ -35,28 +35,28 @@ send_file:
   var:
     basic:
       name: null
-      delay: null
+      delay: 0
       port: 8080
   cmd:
     - sleep $(delay) && nc -N 127.0.0.1 $(port) < resources/$(name)
 
 integration_test:
-  cmd: |
-    #/usr/bin/bash
-    pymake run send_file first_book.txt 5 &
-    pymake run send_file second_book.txt 4 &
-    pymake run send_file third_book.txt 3 &
-    pymake run send_file fourth_book.txt 6 &
-    pymake run send_file fifth_book.txt 2 &
-    pymake run send_file sixth_book.txt 8 &
-    pymake run send_file seventh_book.txt 1 &
-    pymake run send_file eighth_book.txt 3 &
-    pymake run send_file ninth_book.txt 2 &
-    pymake run send_file tenth_book.txt 4 &
-
+  cmd: 
+    - |
+      #/usr/bin/bash
+      pymake run send_file first_book.txt 1 &
+      pymake run send_file second_book.txt 1 &
+      pymake run send_file third_book.txt 1 &
+      pymake run send_file fourth_book.txt 11&
+      pymake run send_file fifth_book.txt 1 &
+      pymake run send_file sixth_book.txt 1 &
+      pymake run send_file seventh_book.txt 1 &
+      pymake run send_file eighth_book.txt 1 &
+      pymake run send_file ninth_book.txt 1 &
+      pymake run send_file tenth_book.txt 1 &
 
 clean:
   cmd:
     - rm -rf out/*
     - clear
-    - rm book_*.txt
+    - rm -rf book_*.txt

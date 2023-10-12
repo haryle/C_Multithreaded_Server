@@ -4,7 +4,6 @@
 #include <string.h>
 
 void Concurrent_List_Init(list_t* L, char* pattern) {
-    L->head = L->tail = NULL;
     pthread_mutex_init(&L->tail_lock, NULL);
     pthread_mutex_init(&L->write_lock, NULL);
     L->size = 0;
@@ -14,6 +13,8 @@ void Concurrent_List_Init(list_t* L, char* pattern) {
     Map_Init(L->map, &L->pattern);
     L->best_count = 0;
     L->best_title = NULL;
+    L->head = NULL;
+    L->tail = NULL;
 }
 
 int Concurrent_List_Insert(list_t* L, char* title, char* content) {
@@ -41,6 +42,7 @@ int Concurrent_List_Insert(list_t* L, char* title, char* content) {
 }
 
 void Concurrent_List_Free(list_t* L) {
+    printf("Reach here\n");
     Map_Free(L->map);
     free(L->map);
     free(L->pattern);
@@ -79,18 +81,37 @@ void Concurrent_List_Write_Book(list_t* L, char* title, int book_id) {
     List_Write_Book(list, book_id);
 }
 
-void Concurrent_List_Calculate(list_t* L, int* done, pthread_cond_t* cond_var);
+// void Concurrent_List_Calculate(list_t* L, int* done, pthread_cond_t* cond_var) {
+//     pthread_mutex_lock(&L->write_lock);
+//     // Find best match pattern
+//     for (int i = 0; i < L->map->size; i++) {
+//         char* title = L->map->keys[i];
+//         linked_list_t* LL = Map_Get(L->map, title);
+//         if (LL->pattern_count > L->best_count) {
+//             L->best_title = &title;
+//             L->best_count = LL->pattern_count;
+//         }
+//     }
+//     *done = 1;
+//     pthread_cond_signal(cond_var);
+//     pthread_mutex_unlock(&L->write_lock);
+// }
 
-void Concurrent_List_Poll(list_t* L, int* already_printed, int* done,
-                          pthread_cond_t* cond_var) {
+// void Concurrent_List_Poll(list_t* L, int* already_printed, int* done,
+//                           pthread_cond_t* cond_var) {
 
-    pthread_mutex_lock(&L->write_lock);
-    while (done == 0)
-        // Wait for update
-        pthread_cond_wait(cond_var, &L->write_lock);
-    if (*already_printed == 0) {
-        //Display to screen results:
-    }
-    // Release lock
-    pthread_mutex_unlock(&L->write_lock);
-}
+//     pthread_mutex_lock(&L->write_lock);
+//     while (*done == 0)
+//         // Wait for update
+//         pthread_cond_wait(cond_var, &L->write_lock);
+//     if (*already_printed == 0) {
+//         //Display to screen results if not yet printed
+//         if (L->best_title == NULL)
+//             printf("Title: NULL, count: 0\n");
+//         else
+//             printf("Title: %s, count: %d\n", *L->best_title, L->best_count);
+//         *already_printed = 1;
+//     }
+//     // Release lock
+//     pthread_mutex_unlock(&L->write_lock);
+// }

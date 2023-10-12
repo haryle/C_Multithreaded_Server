@@ -5,6 +5,7 @@
         "list.h": "c",
         "stdlib.h": "c",
         "system_error": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "string.h": "c"
     }
 }

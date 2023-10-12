@@ -1,45 +1,74 @@
-#include <arpa/inet.h>
-#include <pthread.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include "../utils/list.h"
-#include "../utils/string_vector.h"
-#define LISTEN_BACKLOG 50
-#define MAX 10
-#define VECTORSIZE 1024
-#define MAXTHREADCOUNT 50
-#define handle_error(msg)   \
-    do {                    \
-        perror(msg);        \
-        exit(EXIT_FAILURE); \
-    } while (0)
+#include "server.h"
 
-#define handle_parse_error()                                            \
-    {                                                                   \
-        printf("Usage: server -l <port_number> -p <search_pattern>\n"); \
-        exit(EXIT_FAILURE);                                             \
+void parse_cli(int argc, char** argv, int* port, char** pattern) {
+    if (argc != 5) {
+        handle_parse_error();
+    } else {
+        if (strcmp(argv[1], "-l") != 0)
+            handle_parse_error();
+        if (strcmp(argv[3], "-p") != 0)
+            handle_parse_error();
+        *port = atoi(argv[2]);
+        *pattern = argv[4];
     }
-
-int server_socket;  // Server socket file descriptor
-list_t List;        // Concurrent List Data Structure
-pthread_mutex_t id_lock = PTHREAD_MUTEX_INITIALIZER;
-int sequence_id = 0;
-
-// Release the socket
-void shutdown_server() {
-    printf("Closing Server\n");
-    close(server_socket);
 }
 
-// Close server socket, free up resources
-void handle_SIGINT(int sig) {
-    shutdown_server();
-    exit(0);
+void Init_Server(server_t* server, char* pattern, int port) {
+    server->status = 0;
+    server->sequence_id = 0;
+    pthread_mutex_init(&server->lock, NULL);
+    // Init list
+    server->L = (list_t*)malloc(sizeof(list_t));
+    if (server->L == NULL) {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
+    Concurrent_List_Init(server->L, pattern);
+
+    // Setup server socket
+    struct sockaddr_in server_addr;
+    // Create server socket
+    server->server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    int option = 1;
+    // Allow socket reuse
+    setsockopt(server->server_socket, SOL_SOCKET, SO_REUSEADDR, &option,
+               sizeof(option));
+    if (server->server_socket == -1)
+        handle_error("socket");
+
+    // Create address
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_addr.sin_port = htons(port);
+
+    // Bind address
+    if (bind(server->server_socket, (struct sockaddr*)&server_addr,
+             sizeof(server_addr)) == -1)
+        handle_error("bind");
+
+    // Listen on port
+    if (listen(server->server_socket, LISTEN_BACKLOG) == -1)
+        handle_error("listen");
+    printf("Server listening on port: %d\n", port);
+    printf("Search pattern: %s\n", pattern);
+}
+
+int Get_Sequence_Id_Server(server_t* server) {
+    pthread_mutex_lock(&server->lock);
+    int retval = server->sequence_id;
+    server->sequence_id++;
+    pthread_mutex_unlock(&server->lock);
+    return retval;
+}
+
+// Release the socket
+void Shutdown_Server(server_t* server) {
+    printf("Closing Server\n");
+    close(server->server_socket);
+    Concurrent_List_Free(server->L);
+    free(server->L);
+    server->status = 1;
 }
 
 /*
@@ -57,7 +86,7 @@ Arguments:
     num_parsed_line: ptr to number of lines that have been parsed
 */
 void process_buffer(string_vector_t* vector, char* buffer, int size,
-                    char** title, int* num_parsed_lines) {
+                    char** title, int* num_parsed_lines, list_t* L) {
     char* content;
     char temp[size];
     int temp_idx = 0;
@@ -73,9 +102,10 @@ void process_buffer(string_vector_t* vector, char* buffer, int size,
             content = Vector_Flush(vector);
             // Display to stdout new node:
             // printf("%s", content);
+            // Set first line to title
             if (*num_parsed_lines == 0)
                 *title = content;
-            Concurrent_List_Insert(&List, *title, content);
+            Concurrent_List_Insert(L, *title, content);
             // Free content if it is not title
             if (*num_parsed_lines != 0)
                 free(content);
@@ -93,11 +123,7 @@ void process_buffer(string_vector_t* vector, char* buffer, int size,
 Connection runnable task to be handled by each thread
 */
 void* connection_runnable(void* arg) {
-    pthread_mutex_lock(&id_lock);
-    int thread_id = sequence_id;
-    sequence_id = (sequence_id + 1);
-    pthread_mutex_unlock(&id_lock);
-    int connfd = *(int*)arg;
+    runnable_params_t* params = (runnable_params_t*)arg;
     char buff[MAX];
     int read_len, num_parsed_lines = 0;
     char* title = NULL;
@@ -107,19 +133,27 @@ void* connection_runnable(void* arg) {
     while (true) {
         // Clear buffer
         bzero(buff, MAX);
+
         // read the message from client and copy it in buffer
-        read_len = recv(connfd, buff, sizeof(buff), 0);
-        // process the buffer
-        process_buffer(vector, buff, read_len, &title, &num_parsed_lines);
+        read_len = recv(params->client_socket, buff, sizeof(buff), 0);
+        process_buffer(vector, buff, read_len, &title, &num_parsed_lines,
+                       params->server->L);
         if (read_len == 0) {
+            //Flush remaining buffer to file:
+            if (vector->size != 0) {
+                char* content = Vector_Flush(vector);
+                Concurrent_List_Insert(params->server->L, title, content);
+                free(content);
+            }
             break;
         }
     }
     // Write to file
+    int thread_id = Get_Sequence_Id_Server(params->server);
     printf("Writing book_%d.txt\n", thread_id);
-    Concurrent_List_Write_Book(&List, title, thread_id);
+    Concurrent_List_Write_Book(params->server->L, title, thread_id);
     // Collect Garbage
-    close(connfd);
+    close(params->client_socket);
     Vector_Free(vector);
     free(vector);
     if (title != NULL)
@@ -127,67 +161,24 @@ void* connection_runnable(void* arg) {
     return NULL;
 }
 
-int main(int argc, char** argv) {
-    // Parse CLI
-    int port;
-    char* pattern;
-    if (argc != 5) {
-        handle_parse_error();
-    } else {
-        if (strcmp(argv[1], "-l") != 0)
-            handle_parse_error();
-        if (strcmp(argv[3], "-p") != 0)
-            handle_parse_error();
-        port = atoi(argv[2]);
-        pattern = argv[4];
-    }
-    // Initialise arguments
+void Run_Server(server_t* server) {
     int client_socket;
-    struct sockaddr_in server_addr, client_addr;
     socklen_t addr_size;
-    // Create server socket
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    int option = 1;
-    // Allow socket reuse
-    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &option,
-               sizeof(option));
-    if (server_socket == -1)
-        handle_error("socket");
-
-    // Create address
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_addr.sin_port = htons(port);
-
-    // Bind address
-    if (bind(server_socket, (struct sockaddr*)&server_addr,
-             sizeof(server_addr)) == -1)
-        handle_error("bind");
-
-    // Listen on port
-    if (listen(server_socket, LISTEN_BACKLOG) == -1)
-        handle_error("listen");
-    printf("Server listening on port: %d\n", port);
-    printf("Search pattern: %s\n", pattern);
-
-    // Init list
-    Concurrent_List_Init(&List, pattern);
-
-    //=============================================================
-    //                  WHILE LOOP
-    //=============================================================
-
-    // /* Now we can accept incoming connections one
-    //           at a time using accept(2). */
+    struct sockaddr_in client_addr;
     while (true) {
-        signal(SIGINT, handle_SIGINT);
         addr_size = sizeof(client_addr);
-        client_socket =
-            accept(server_socket, (struct sockaddr*)&client_addr, &addr_size);
+        client_socket = accept(server->server_socket,
+                               (struct sockaddr*)&client_addr, &addr_size);
+
         if (client_socket == -1)
             handle_error("accept");
+
+        runnable_params_t params = (runnable_params_t){server, client_socket};
         pthread_t thr;
-        pthread_create(&thr, NULL, connection_runnable, (void*)&client_socket);
+
+        pthread_create(&thr, NULL, connection_runnable, (void*)&params);
+        if (server->status == 1)
+            break;
     }
 }
+
