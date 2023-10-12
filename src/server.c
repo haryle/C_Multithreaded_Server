@@ -27,11 +27,8 @@
 
 int server_socket;  // Server socket file descriptor
 list_t List;        // Concurrent List Data Structure
-
-typedef struct ___runnable_param_t {
-    int client_socket;
-    int thread_id;
-} runnable_param_t;
+pthread_mutex_t id_lock = PTHREAD_MUTEX_INITIALIZER;
+int sequence_id = 0;
 
 // Release the socket
 void shutdown_server() {
@@ -75,7 +72,7 @@ void process_buffer(string_vector_t* vector, char* buffer, int size,
             //Insert to concurrent list
             content = Vector_Flush(vector);
             // Display to stdout new node:
-            printf("%s", content);
+            // printf("%s", content);
             if (*num_parsed_lines == 0)
                 *title = content;
             Concurrent_List_Insert(&List, *title, content);
@@ -96,8 +93,11 @@ void process_buffer(string_vector_t* vector, char* buffer, int size,
 Connection runnable task to be handled by each thread
 */
 void* connection_runnable(void* arg) {
-    runnable_param_t* argv = (runnable_param_t*)arg;
-    int connfd = argv->client_socket;
+    pthread_mutex_lock(&id_lock);
+    int thread_id = sequence_id;
+    sequence_id = (sequence_id + 1);
+    pthread_mutex_unlock(&id_lock);
+    int connfd = *(int*)arg;
     char buff[MAX];
     int read_len, num_parsed_lines = 0;
     char* title = NULL;
@@ -112,14 +112,13 @@ void* connection_runnable(void* arg) {
         // process the buffer
         process_buffer(vector, buff, read_len, &title, &num_parsed_lines);
         if (read_len == 0) {
-            printf("Breaking Loop\n");
             break;
         }
     }
     // Write to file
-    Concurrent_List_Write_Book(&List, title, argv->thread_id);
+    printf("Writing book_%d.txt\n", thread_id);
+    Concurrent_List_Write_Book(&List, title, thread_id);
     // Collect Garbage
-    printf("Closing client socket\n");
     close(connfd);
     Vector_Free(vector);
     free(vector);
@@ -181,7 +180,6 @@ int main(int argc, char** argv) {
 
     // /* Now we can accept incoming connections one
     //           at a time using accept(2). */
-    int thread_id = 0;
     while (true) {
         signal(SIGINT, handle_SIGINT);
         addr_size = sizeof(client_addr);
@@ -189,8 +187,7 @@ int main(int argc, char** argv) {
             accept(server_socket, (struct sockaddr*)&client_addr, &addr_size);
         if (client_socket == -1)
             handle_error("accept");
-        runnable_param_t param = (runnable_param_t){client_socket, thread_id++};
         pthread_t thr;
-        pthread_create(&thr, NULL, connection_runnable, (void*)&param);
+        pthread_create(&thr, NULL, connection_runnable, (void*)&client_socket);
     }
 }
