@@ -122,7 +122,7 @@ Connection runnable task to be handled by each thread
 */
 void* connection_runnable(void* arg) {
     runnable_params_t* params = (runnable_params_t*)arg;
-    // printf("New thread, client socket: %d\n", params->client_socket);
+    int client_socket = *(params->client_socket);
     char buff[MAX];
     int read_len = 0;
     int num_parsed_lines = 0;
@@ -135,7 +135,7 @@ void* connection_runnable(void* arg) {
         bzero(buff, MAX);
 
         // read the message from client and copy it in buffer
-        read_len = recv(*params->client_socket, buff, sizeof(buff), 0);
+        read_len = recv(client_socket, buff, sizeof(buff), 0);
         process_buffer(vector, buff, read_len, &num_parsed_lines,
                        params->server->L);
         if (read_len == 0) {
@@ -155,8 +155,8 @@ void* connection_runnable(void* arg) {
     printf("Writing book_%d.txt\n", thread_id);
     Concurrent_List_Write_Book(params->server->L, vector->title, thread_id);
     // Collect Garbage
-    close(*params->client_socket);
-    // free(params->client_socket);
+    close(client_socket);
+    free(params->client_socket);
     Vector_Free(vector);
     free(vector);
     return NULL;

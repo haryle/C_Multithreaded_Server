@@ -1,9 +1,4 @@
-#include <arpa/inet.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#include "server.h"
 
 #define PORT 8080
 #define MAX_CLIENTS 50
@@ -18,10 +13,18 @@ void* handle_client(void* client_socket) {
 
     // Create a unique filename based on connection ID
     char filename[20];
+
+    // Get seq num
     pthread_mutex_lock(&lock);
-    snprintf(filename, sizeof(filename), "book_%d.txt", seq_num);
+    int file_name = seq_num;
     seq_num++;
     pthread_mutex_unlock(&lock);
+
+    //Make file name
+    if (file_name < 10)
+        snprintf(filename, sizeof(filename), "book_0%d.txt", seq_num);
+    else
+        snprintf(filename, sizeof(filename), "book_%d.txt", seq_num);
 
     FILE* file = fopen(filename, "w");
     if (file == NULL) {
@@ -42,43 +45,30 @@ void* handle_client(void* client_socket) {
     pthread_exit(NULL);
 }
 
-int main() {
-    int server_socket, client_socket, addr_len;
-    struct sockaddr_in server_addr, client_addr;
+int main(int argc, char* argv[]) {
+    // Parse CLI
+    int port;
+    char* pattern;
+    parse_cli(argc, argv, &port, &pattern);
+
+    // Initialise server
+    server_t* server = (server_t*)malloc(sizeof(server_t));
+    if (server == NULL) {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
+    Init_Server(server, pattern, port);
+
+    int client_socket, addr_len;
+    struct sockaddr_in client_addr;
     pthread_t thread_id;
-
-    // Create socket
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_socket == -1) {
-        perror("Socket creation failed");
-        exit(EXIT_FAILURE);
-    }
-
-    // Initialize server address struct
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(PORT);
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-
-    // Bind the socket
-    if (bind(server_socket, (struct sockaddr*)&server_addr,
-             sizeof(server_addr)) == -1) {
-        perror("Binding failed");
-        exit(EXIT_FAILURE);
-    }
-
-    // Listen for incoming connections
-    if (listen(server_socket, MAX_CLIENTS) == -1) {
-        perror("Listening failed");
-        exit(EXIT_FAILURE);
-    }
-
-    printf("Server listening on port %d\n", PORT);
 
     while (1) {
         addr_len = sizeof(struct sockaddr_in);
         // Accept a new client connection
-        client_socket = accept(server_socket, (struct sockaddr*)&client_addr,
-                               (socklen_t*)&addr_len);
+        client_socket =
+            accept(server->server_socket, (struct sockaddr*)&client_addr,
+                   (socklen_t*)&addr_len);
         if (client_socket == -1) {
             perror("Accepting client failed");
             continue;
@@ -97,6 +87,6 @@ int main() {
         printf("New client connected, assigned thread id: %ld\n", thread_id);
     }
 
-    close(server_socket);
+    close(server->server_socket);
     return 0;
 }
