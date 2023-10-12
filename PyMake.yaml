@@ -35,7 +35,7 @@ send_file:
   var:
     basic:
       name: null
-      delay: 0
+      delay: null
       port: 8080
   cmd:
     - sleep $(delay) && nc -N 127.0.0.1 $(port) < resources/$(name)
