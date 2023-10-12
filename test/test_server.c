@@ -25,6 +25,8 @@ int incorrect = 0;
 
 int test_status = 0;
 
+int port = 8080;
+
 char* titles[FIXTURESIZE] = {
     "first_book.txt", "second_book.txt", "third_book.txt",   "fourth_book.txt",
     "fifth_book.txt", "sixth_book.txt",  "seventh_book.txt", "eighth_book.txt",
@@ -46,7 +48,7 @@ void before_each(const char* test_name, char* pattern) {
         perror("malloc");
         exit(EXIT_FAILURE);
     }
-    Init_Server(server, pattern, 8080);
+    Init_Server(server, pattern, port);
     //Run server as background thread
     pthread_t thr;
     pthread_create(&thr, NULL, thread_run, NULL);
@@ -58,9 +60,10 @@ void after_each(const char* test_name) {
         incorrect += 1;
     }
     Shutdown_Server(server);
+    port++;
 }
 
-void exec_cmd(char* arg) {
+void exec_cmd(char** arg) {
     int pid = fork();
     if (!pid) {
         execvp(arg[0], arg);
@@ -81,7 +84,9 @@ void exec_cmd(char* arg) {
 }
 
 void upload_file(char* filename) {
-    char* arg[] = {"pymake", "run", "send_file", filename, NULL};
+    char port_str[5];
+    sprintf(port_str, "%d", port);
+    char* arg[] = {"pymake", "run", "send_file", filename, "0", port_str, NULL};
     exec_cmd(arg);
 }
 
@@ -95,11 +100,12 @@ void upload_to_server(char* filename) {}
 void test_single_file_upload(int i) {
     before_each(__func__, "S");
     upload_file(titles[i]);
-
+    compare();
     after_each(__func__);
 }
 
 int main() {
-    test_single_file_upload();
+    for (int i = 0; i < FIXTURESIZE; i++)
+        test_single_file_upload(i);
     printf("Pass: %d, Fail: %d\n", total - incorrect, incorrect);
 }
