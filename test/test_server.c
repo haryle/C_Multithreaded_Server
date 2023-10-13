@@ -124,13 +124,13 @@ void test_parallel_file_upload() {
         pthread_create(&thr[i], NULL, parallel_thread_upload, (void*)titles[i]);
     }
 
-    // pthread_join(thr[0], NULL);
-    // for (int i = 0; i < FIXTURESIZE; i++) {
-    //     pthread_join(thr[i], NULL);
-    // }
+    pthread_join(thr[0], NULL);
+    for (int i = 0; i < FIXTURESIZE; i++) {
+        pthread_join(thr[i], NULL);
+    }
     sleep(3);
 
-    // compare();
+    compare();
     after_each(__func__);
 }
 
@@ -138,6 +138,6 @@ int main() {
     for (int i = 0; i < FIXTURESIZE; i++)
         test_single_file_upload(i);
     test_sequential_file_upload();
-    // test_parallel_file_upload();
+    test_parallel_file_upload();
     printf("Pass: %d, Fail: %d\n", total - incorrect, incorrect);
 }
