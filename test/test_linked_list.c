@@ -37,7 +37,7 @@ void before_each(const char* test_name, char** pattern, char** title) {
     total += 1;
     L = (linked_list_t*)malloc(sizeof(linked_list_t));
     List_Init(L, pattern, title);
-    printf("Begin test: %s\n", test_name);
+    // printf("Begin test: %s\n", test_name);
 }
 
 void after_each(const char* test_name) {

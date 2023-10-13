@@ -7,6 +7,16 @@ test:
     - gcc test/test_$(program).c $(deps) -Wall -pthread -o out/test_$(program).o
     - ./out/test_$(program).o
 
+test_all:
+  cmd:
+    - pymake run test node 
+    - pymake run test map 
+    - pymake run test list 
+    - pymake run test linked_list 
+    - pymake run test string_vector 
+    - pymake run test files
+    - pymake run test files_concurrent
+    - pymake run test server
 
 compare:
   cmd:
@@ -17,7 +27,7 @@ server:
   var:
     basic:
       port: 8080
-      pattern: happy
+      pattern: splendid
       deps: utils/node.c utils/linked_list.c utils/map.c utils/string_vector.c utils/list.c src/server.c
   cmd:
     - mkdir -p out

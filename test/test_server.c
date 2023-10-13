@@ -39,7 +39,7 @@ void* thread_run(void* arg) {
 }
 
 void before_each(const char* test_name, char* pattern) {
-    printf("Begin test: %s\n", test_name);
+    // printf("Begin test: %s\n", test_name);
     test_status = 0;
     total += 1;
     // Initialise server

@@ -117,7 +117,7 @@ void after_each(const char* test_name) {
 
 void before_each(const char* test_name, char* pattern, int serial, int write) {
     global_id = 0;
-    printf("Begin test: %s\n", test_name);
+    // printf("Begin test: %s\n", test_name);
     test_status = 0;
     total += 1;
     thread_arg_t args[FIXTURESIZE];

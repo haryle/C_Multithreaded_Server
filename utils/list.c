@@ -42,7 +42,6 @@ int Concurrent_List_Insert(list_t* L, char* title, char* content) {
 }
 
 void Concurrent_List_Free(list_t* L) {
-    printf("Reach here\n");
     Map_Free(L->map);
     free(L->map);
     free(L->pattern);

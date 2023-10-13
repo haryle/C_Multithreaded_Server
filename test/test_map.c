@@ -40,7 +40,7 @@ void before_each(const char* test_name, char** pattern) {
     total += 1;
     M = (map_t*)malloc(sizeof(map_t));
     Map_Init(M, pattern);
-    printf("Begin test: %s\n", test_name);
+    // printf("Begin test: %s\n", test_name);
 }
 
 void after_each(const char* test_name) {

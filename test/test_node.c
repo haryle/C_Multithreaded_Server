@@ -12,7 +12,7 @@ int test_status = 0;
 void before_each(const char* test_name, char** pattern) {
     test_status = 0;
     total += 1;
-    printf("Begin test: %s\n", test_name);
+    // printf("Begin test: %s\n", test_name);
     Node_Init(first_line, pattern, &first);
     Node_Init(second_line, pattern, &second);
 }
