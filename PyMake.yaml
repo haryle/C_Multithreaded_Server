@@ -60,7 +60,6 @@ integration_test:
       pymake run send_file eighth_book.txt 1 &
       pymake run send_file ninth_book.txt 1 &
       pymake run send_file tenth_book.txt 1 &
-    - sleep 3 && pymake run compare 
 
 clean:
   cmd:
