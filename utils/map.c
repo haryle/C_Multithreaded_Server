@@ -93,3 +93,14 @@ void Map_Free(map_t* M) {
     }
     M->size = 0;
 }
+
+void Map_Analyse(map_t* M, char** best_title, int* best_count) {
+    for (int i = 0; i < M->size; i++) {
+        char* title = M->keys[i];
+        linked_list_t* LL = Map_Get(M, title);
+        if (LL->pattern_count > *best_count) {
+            *best_title = title;
+            *best_count = LL->pattern_count;
+        }
+    }
+}

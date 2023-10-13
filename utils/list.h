@@ -23,7 +23,7 @@ typedef struct __list_t {
     pthread_mutex_t write_lock;  // Analysis lock
     int size;                    // Size
     char* pattern;               // Pattern
-    char** best_title;           // Best Title
+    char* best_title;           // Best Title
     int best_count;              // Best count
 } list_t;
 
@@ -112,3 +112,7 @@ Arguments:
 */
 void Concurrent_List_Poll(list_t* L, int* already_printed, int* done,
                           pthread_cond_t* cond_var);
+
+void* thread_analyse(void* params);
+
+void Concurrent_List_Analyse(list_t* L);

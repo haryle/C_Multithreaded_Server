@@ -70,3 +70,5 @@ int Map_Insert(map_t* M, char* title, char* value);
 
 /* Free map memory */
 void Map_Free(map_t* M);
+
+void Map_Analyse(map_t* M, char** best_title, int* best_count);

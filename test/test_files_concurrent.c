@@ -201,6 +201,23 @@ void test_files_written_while_pthread() {
     after_each(__func__);
 }
 
+void test_analyse_pattern(char* pattern, char* expected_title,
+                          int expected_count) {
+    before_each(__func__, pattern, false, false);
+    char* best_title;
+    int best_count = 0;
+    Map_Analyse(L->map, &best_title, &best_count);
+    assertEqualsStr(best_title, expected_title);
+    assertEqualsInt(best_count, expected_count);
+    after_each(__func__);
+}
+
+void test_print_to_screen(char* pattern) {
+    before_each(__func__, pattern, false, false);
+    Concurrent_List_Analyse(L);
+    after_each(__func__);
+}
+
 int main() {
     test_all_nodes_created(true, false);
     for (int i = 0; i < 5; i++)
@@ -208,5 +225,9 @@ int main() {
     test_files_written();
     for (int i = 0; i < 5; i++)
         test_files_written_while_pthread();
+    test_analyse_pattern("splendid", "eighth_book.txt", 11);
+    test_analyse_pattern("Splendid", "fourth_book.txt", 1);
+    test_analyse_pattern("splendid fellows", "eighth_book.txt", 1);
+    test_print_to_screen("Saying");
     printf("Pass: %d, Fail: %d\n", total - incorrect, incorrect);
 }
