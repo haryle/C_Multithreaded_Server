@@ -168,7 +168,9 @@ void Run_Server(server_t* server) {
     int client_socket;
     socklen_t addr_size;
     struct sockaddr_in client_addr;
-
+    pthread_t analysis_thr;
+    pthread_create(&analysis_thr, NULL, thread_analyse_server_list,
+                   (void*)server);
     pthread_t thr;
 
     while (true) {
@@ -188,4 +190,16 @@ void Run_Server(server_t* server) {
         if (server->status == 1)
             break;
     }
+}
+
+void* thread_analyse_server_list(void* arg) {
+    server_t* server = (server_t*)arg;
+    pthread_t thr;
+    while (true) {
+        if (server->status == 1)
+            break;
+        sleep(FREQUENCY);
+        pthread_create(&thr, NULL, thread_analyse, (void*)server->L);
+    }
+    return NULL;
 }

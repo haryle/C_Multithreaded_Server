@@ -13,6 +13,7 @@
 #define MAX 100
 #define VECTORSIZE 1024
 #define MAXTHREADCOUNT 50
+#define FREQUENCY 5
 #define handle_error(msg)   \
     do {                    \
         perror(msg);        \
@@ -47,3 +48,5 @@ void* connection_runnable(void* arg);
 void Run_Server(server_t* server);
 
 void parse_cli(int argc, char** argv, int* port, char** pattern);
+
+void* thread_analyse_server_list(void* server);
