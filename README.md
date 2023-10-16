@@ -3,8 +3,8 @@ OS_Assignment3
 
 # Credits:
 Harry Le
-Angelos Sohan
 Emily Miller
+Angelos Sohan
 
 # Project Structure
 Source code is located in the `src/` folder.
