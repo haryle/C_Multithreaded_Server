@@ -127,7 +127,8 @@ void handle_io(int client_socket, list_t* L, server_t* server) {
     // Recv data loop
     while (true) {
         // Clear buffer
-        bzero(buff, MAX);
+        // bzero(buff, MAX);
+        memset(buff, 0, MAX);
 
         // read the message from client and copy it in buffer
         read_len = recv(client_socket, buff, sizeof(buff), 0);
