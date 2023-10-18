@@ -2,4 +2,4 @@ deps = utils/node.c utils/linked_list.c utils/map.c utils/string_vector.c utils/
 
 
 compile_server:
-	gcc -Wall assignment3.c $(deps)  -o out/server.o -pthread
+	gcc -Wall assignment3.c $(deps)  -o out/server.o -pthread -std=c99
