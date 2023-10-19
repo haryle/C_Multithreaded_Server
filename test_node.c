@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "../utils/node.h"
+#include "node.h"
 
 node_t *first, *second;
 char* first_line = "This is a line\n";

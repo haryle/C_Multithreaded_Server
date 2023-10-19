@@ -2,9 +2,9 @@ test:
   var:
     basic:
       program: null 
-      deps: utils/node.c utils/linked_list.c utils/map.c utils/string_vector.c utils/list.c src/server.c
+      deps: node.c linked_list.c map.c string_vector.c list.c server.c
   cmd:
-    - gcc test/test_$(program).c $(deps) -Wall -pthread -o out/test_$(program).o
+    - gcc test_$(program).c $(deps) -Wall -pthread -o out/test_$(program).o
     - ./out/test_$(program).o
 
 test_all:
@@ -28,10 +28,10 @@ server:
     basic:
       port: 8080
       pattern: splendid
-      deps: utils/node.c utils/linked_list.c utils/map.c utils/string_vector.c utils/list.c src/server.c
+      deps: node.c linked_list.c map.c string_vector.c list.c server.c
   cmd:
     - mkdir -p out
-    - gcc -Wall $(deps) src/server_driver.c -o out/server.o -pthread
+    - gcc -Wall $(deps) server_driver.c -o out/server.o -pthread
     - ./out/server.o -l $(port) -p $(pattern)
 
 program:
@@ -39,11 +39,10 @@ program:
     basic:
       name: null
       port: 8080
-      src: src 
       out: out
   cmd:
     - mkdir -p $(out)
-    - gcc -Wall $(src)/$(name).c -o $(out)/$(name).o -pthread -DPORT=$(port)
+    - gcc -Wall $(name).c -o $(out)/$(name).o -pthread -DPORT=$(port)
     - ./$(out)/$(name).o
 
 send_file:

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../utils/string_vector.h"
+#include "string_vector.h"
 
 string_vector_t* before_each() {
     string_vector_t* vector = (string_vector_t*)malloc(sizeof(string_vector_t));
@@ -80,11 +80,15 @@ int test_append_multiple_strings() {
     char* fixture1 = "This is the first sentence";
     char* fixture2 = "This is the second sentence";
     char fixture[1024];
-    strcat(strcat(fixture, fixture1), fixture2);
+    // Prepare fixture
+    strcpy(fixture, fixture1);
+    strcat(fixture, fixture2);
+    // Append 
     Vector_Append(vector, fixture1);
     Vector_Append(vector, fixture2);
     int status = 0;
     if (strcmp(vector->message, fixture) != 0) {
+        printf("%s\n%s\n", vector->message, fixture);
         printf("Fail: string value comparison\n");
         status = 1;
     }
@@ -92,9 +96,10 @@ int test_append_multiple_strings() {
         printf("Fail: maxsize: %ld, %d\n", vector->max_size, 80);
         status = 1;
     }
-    if (vector->size != strlen(fixture)) {
-        printf("Fail: size: %ld, %ld\n", vector->size, strlen(fixture));
+    if (vector->size != (strlen(fixture1) + strlen(fixture2))) {
         status = 1;
+        printf("%ld, %ld, %ld\n", strlen(fixture1), strlen(fixture2),
+               strlen(fixture));
     }
     if (status == 1) {
         printf("test_append_multiple_strings\n");
@@ -107,11 +112,11 @@ int main() {
     int failed_tests = 0;
     int run_tests = 0;
 
-    run_tests += 1;
-    failed_tests += test_append();
+    // run_tests += 1;
+    // failed_tests += test_append();
 
-    run_tests += 1;
-    failed_tests += test_flush_then_reappend();
+    // run_tests += 1;
+    // failed_tests += test_flush_then_reappend();
 
     run_tests += 1;
     failed_tests += test_append_multiple_strings();

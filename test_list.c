@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include "../utils/list.h"
+#include "list.h"
 #define FIXTURESIZE 10
 #define _GNU_SOURCE
 

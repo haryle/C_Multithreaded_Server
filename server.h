@@ -7,8 +7,8 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "../utils/list.h"
-#include "../utils/string_vector.h"
+#include "list.h"
+#include "string_vector.h"
 
 #define LISTEN_BACKLOG 50
 #define MAX 100

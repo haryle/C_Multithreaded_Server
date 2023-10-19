@@ -1,18 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../utils/map.h"
+#include "linked_list.h"
 #define FIXTURESIZE 10
 #define BOOKSIZE 100
 #include <sys/types.h>
 #include <unistd.h>
 
-typedef struct ___thread_arg_t {
-    char** content;
-    int size;
-} thread_arg_t;
-
-map_t* M;
+linked_list_t* L;
 
 int total = 0;
 
@@ -30,16 +25,18 @@ char* contents[4] = {
     "with only a loose network of volunteer support.\n",
 };
 
-char* titles[11] = {"compsci_4416.txt", "compsci_4417.txt", "compsci_4807.txt",
-                    "compsci_4811.txt", "compsci_4812.txt", "compsci_7007.txt",
-                    "compsci_7039.txt", "compsci_7059.txt", "compsci_7064.txt",
-                    "compsci_7092.txt", "compsci_7076.txt"};
+char* titles[FIXTURESIZE] = {
+    "compsci_4416.txt", "compsci_4417.txt", "compsci_4807.txt",
+    "compsci_4811.txt", "compsci_4812.txt", "compsci_7007.txt",
+    "compsci_7039.txt", "compsci_7059.txt", "compsci_7064.txt",
+    "compsci_7092.txt",
+};
 
-void before_each(const char* test_name, char** pattern) {
+void before_each(const char* test_name, char** pattern, char** title) {
     test_status = 0;
     total += 1;
-    M = (map_t*)malloc(sizeof(map_t));
-    Map_Init(M, pattern);
+    L = (linked_list_t*)malloc(sizeof(linked_list_t));
+    List_Init(L, pattern, title);
     // printf("Begin test: %s\n", test_name);
 }
 
@@ -48,8 +45,8 @@ void after_each(const char* test_name) {
         printf("Fail test: %s\n", test_name);
         incorrect += 1;
     }
-    Map_Free(M);
-    free(M);
+    List_Free(L);
+    free(L);
 }
 
 int assertEqualsStr(char* first, char* second) {
@@ -87,6 +84,7 @@ void read_file(int id, char* content[], int* size) {
     if (fp == NULL)
         return;
     while ((read = getline(&line, &len, fp)) != -1) {
+        // printf("%s", line);
         content[count] = (char*)malloc(read + 1);
         memmove(content[count], line, read + 1);
         count++;
@@ -97,11 +95,9 @@ void read_file(int id, char* content[], int* size) {
     *size = count;
 }
 
-void add_content_to_map(char* content[], int size) {
-    char* title = content[0];
-    for (int i = 0; i < size; i++) {
-        Map_Insert(M, title, content[i]);
-    }
+void add_content_to_list(char* content[], int size) {
+    for (int i = 0; i < size; i++)
+        List_Insert(L, content[i]);
 }
 
 void free_book_content(char* content[], int size) {
@@ -109,19 +105,13 @@ void free_book_content(char* content[], int size) {
         free(content[i]);
 }
 
-void* thread_run(void* arg) {
-    thread_arg_t* argv = (thread_arg_t*)arg;
-    add_content_to_map(argv->content, argv->size);
-    return NULL;
-}
-
 void test_content_from_book_written_to_nodes(int id) {
     char* content[BOOKSIZE];
     int size = 0;
     read_file(id, content, &size);
-    before_each(__func__, &content[0]);
-    add_content_to_map(content, size);
-    node_t* current = Map_Get(M, content[0])->head;
+    before_each(__func__, &content[0], &content[0]);
+    add_content_to_list(content, size);
+    node_t* current = L->head;
     for (int i = 0; i < size; i++) {
         if (current == NULL) {
             test_status += 1;
@@ -134,55 +124,56 @@ void test_content_from_book_written_to_nodes(int id) {
     free_book_content(content, size);
 }
 
-void test_content_from_books_parallel() {
-    pthread_t thr[FIXTURESIZE];
-    char* book_contents[FIXTURESIZE][BOOKSIZE];
-    int sizes[FIXTURESIZE];
-    thread_arg_t args[FIXTURESIZE];
-    for (int i = 0; i < FIXTURESIZE; i++) {
-        read_file(i, book_contents[i], &sizes[i]);
-        args[i] = (thread_arg_t){book_contents[i], sizes[i]};
-    }
-
-    before_each(__func__, &contents[0]);
-    for (int i = 0; i < FIXTURESIZE; i++) {
-        pthread_create(&thr[i], NULL, thread_run, &args[i]);
-    }
-
-    for (int i = 0; i < FIXTURESIZE; i++) {
-        pthread_join(thr[i], NULL);
-    }
-
-    for (int i = 0; i < FIXTURESIZE; i++) {
-        char* title = args->content[0];
-        test_status += assertEqualsInt(Map_Contains(M, title), 1);
-        char** content = args->content;
-        int size = args->size;
-        node_t* current = Map_Get(M, title)->head;
-        for (int j = 0; j < size; j++) {
-            if (current == NULL) {
-                test_status += 1;
-                break;
-            }
-            test_status += assertEqualsStr(content[j], current->content);
-
-            current = current->book_next;
-        }
-    }
-
+void test_fixture_content_pattern_dona_counts() {
+    char* pattern = "dona";
+    int exp_count = 4;
+    before_each(__func__, &pattern, &pattern);
+    add_content_to_list(contents, 4);
+    test_status += assertEqualsInt(L->pattern_count, exp_count);
     after_each(__func__);
+}
 
-    for (int i = 0; i < FIXTURESIZE; i++)
-        free_book_content(book_contents[i], sizes[i]);
+void test_fixture_content_contains_lines() {
+    char* pattern = "dona";
+    before_each(__func__, &pattern, &pattern);
+    add_content_to_list(contents, 4);
+    for (int i = 0; i < 4; i++) {
+        test_status += assertEqualsInt(List_Contains(L, contents[i]), 1);
+    }
+    after_each(__func__);
+}
+
+void test_fixture_content_next_pattern() {
+    char* pattern = "dona";
+    before_each(__func__, &pattern, &pattern);
+    add_content_to_list(contents, 4);
+    node_t* current = L->pattern_head;
+    test_status += assertEqualsStr(current->content, contents[0]);
+    current = current->next_frequent_search;
+    test_status += assertEqualsStr(current->content, contents[1]);
+    current = current->next_frequent_search;
+    test_status += assertEqualsStr(current->content, contents[2]);
+    current = current->next_frequent_search;
+    assertEqualsInt(current == NULL, 1);
+    after_each(__func__);
+}
+
+void test_fixture_content_pattern_does_not_exist() {
+    char* pattern = "doesnotexist";
+    before_each(__func__, &pattern, &pattern);
+    add_content_to_list(contents, 4);
+    assertEqualsInt(L->pattern_head == NULL, 1);
+    assertEqualsInt(L->pattern_count, 0);
+    after_each(__func__);
 }
 
 int main() {
     for (int id = 0; id < FIXTURESIZE; id++) {
         test_content_from_book_written_to_nodes(id);
     }
-    // Ensure nothing wrong happens with multi-threading
-    for (int i = 0; i < 1000; i++) {
-        test_content_from_books_parallel();
-    }
+    test_fixture_content_pattern_dona_counts();
+    test_fixture_content_contains_lines();
+    test_fixture_content_next_pattern();
+    test_fixture_content_pattern_does_not_exist();
     printf("Pass: %d, Fail: %d\n", total - incorrect, incorrect);
 }

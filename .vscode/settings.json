@@ -7,6 +7,8 @@
         "system_error": "c",
         "stdbool.h": "c",
         "string.h": "c",
-        "server.h": "c"
+        "server.h": "c",
+        "unistd.h": "c",
+        "types.h": "c"
     }
 }
