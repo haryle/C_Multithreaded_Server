@@ -1,4 +1,4 @@
-deps = node.c linked_list.c map.c string_vector.c list.c src/server.c
+deps = node.c linked_list.c map.c string_vector.c list.c server.c
 
 
 compile_server:
