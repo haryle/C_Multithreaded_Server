@@ -105,10 +105,12 @@ void Concurrent_List_Poll(list_t* L, int* already_printed, int* done,
         pthread_cond_wait(cond_var, &L->write_lock);
     if (*already_printed == 0) {
         //Display to screen results if not yet printed
-        if (L->best_title == NULL)
-            printf("Title: NULL, count: 0\n");
-        else
-            printf("Title: %s, count: %d\n", L->best_title, L->best_count);
+        if (L->best_title == NULL) {
+            // printf("Title: NULL, count: 0\n");
+        } else {
+            printf("%s\n", L->best_title);
+            // printf("Title: %s, count: %d\n", L->best_title, L->best_count);
+        }
         *already_printed = 1;
     }
     // Release lock

@@ -146,7 +146,7 @@ void handle_io(int client_socket, list_t* L, server_t* server) {
     }
     // Write to file
     int thread_id = Get_Sequence_Id_Server(server);
-    printf("Writing book_%d.txt\n", thread_id);
+    // printf("Writing book_%d.txt\n", thread_id);
     Concurrent_List_Write_Book(L, vector->title, thread_id);
     // Collect Garbage
     close(client_socket);
