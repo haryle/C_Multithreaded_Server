@@ -77,3 +77,4 @@ clean:
     - rm -rf book_*.txt
     - rm -rf output_*.txt
     - rm -rf client_*.txt
+    - rm -rf assignment3
