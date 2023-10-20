@@ -101,7 +101,7 @@ void process_buffer(string_vector_t* vector, char* buffer, int size,
             //Insert to concurrent list
             content = Vector_Flush(vector);
             // Display to stdout new node:
-            printf("%s", content);
+            printf("Adding a node to shared linked list\n");
 
             Concurrent_List_Insert(L, vector->title, content);
             // Free content if it is not title
